@@ -1,3 +1,0 @@
-[submodule "tomadvisor-frontend"]
-	path = tomadvisor-frontend
-	url = https://github.com/brendanfh/tomadvisor-frontend.git

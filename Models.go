@@ -8,7 +8,7 @@ import (
 
 type Admin struct {
 	ID        uint64 `gorm:"primary_key"`
-	Email     string
+	Email     string `gorm:"unique"`
 	FirstName string
 	LastName  string
 	Password  string
@@ -16,7 +16,7 @@ type Admin struct {
 
 type Student struct {
 	StudentID uint64 `gorm:"primary_key"`
-	Email     string
+	Email     string `gorm:"unique"`
 	FirstName string
 	LastName  string
 	Password  string

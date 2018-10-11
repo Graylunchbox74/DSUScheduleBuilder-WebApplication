@@ -1,3 +1,9 @@
-from server import server
+from server import app
 
-server.start_server()
+
+def start_server():
+    app.run(host=app.config['HOST'], port=app.config['PORT'])
+
+
+if __name__ == '__main__':
+    start_server()

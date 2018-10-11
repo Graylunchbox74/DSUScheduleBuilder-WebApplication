@@ -1,0 +1,16 @@
+/api/user/validateUser/:email/:password
+    GET request, returns 1 if success, 0 if fail
+
+/api/user/newUser
+    POST
+        parameters:
+            email
+            password
+            firstName
+            lastName
+
+/api/user/delteUser
+    POST
+        parameters:
+            email
+

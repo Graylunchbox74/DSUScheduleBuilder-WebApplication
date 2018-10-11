@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  webserver:
+    ports:
+      - 8080:80
+    volumes:
+      - ./www/server:/usr/src/app/server
+
+    # add depends_on and volumes later

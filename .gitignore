@@ -1,1 +1,2 @@
-www/compiled-server
+www/__pycache__
+.vscode/

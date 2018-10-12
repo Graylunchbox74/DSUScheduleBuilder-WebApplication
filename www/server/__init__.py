@@ -12,5 +12,5 @@ app = Flask(
 app.config.from_object('config.default')
 app.config.from_envvar('APP_CONFIG')
 
-from server import controllers
 from server.controllers import home_controller
+from server.controllers import login_controller

@@ -1,0 +1,16 @@
+{% extends 'partials/_layout.html' %}
+{% from 'utils/_formutils.html' import render_field %}
+
+{% block content %}
+<div class="content-section">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+
+        <legend class="border-bottom mb-4">Log in</legend>
+
+        {{ render_field(form.email, class="form-control form-control-lg") }}
+        {{ render_field(form.password, class="form-control form-control-lg") }}
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+</div>
+{% endblock %}

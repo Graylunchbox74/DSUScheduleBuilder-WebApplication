@@ -6,10 +6,10 @@ services:
       - 8080:80
     volumes:
       - ./www/server:/usr/src/app/server
-      - ./www/config:/usr/src/app/config
-  api:
-    ports:
-      - 8079:80
+  #     - ./www/config:/usr/src/app/config
+  # api:
+  #   ports:
+  #     - 8079:80
       
 
     # add depends_on and volumes later

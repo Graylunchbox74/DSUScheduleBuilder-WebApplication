@@ -2,14 +2,14 @@
 <div class="form-group">
     {{ field.label(class="form-control-label") }}
     {% if field.errors %}
-    {{ field(class="form-control form-control-lg is-invalid") | safe }}
+    {{ field(class="form-control form-control-lg is-invalid", **kwargs) | safe }}
     <div class="invalid-feedback">
         {% for error in field.errors %}
         <span>{{ error }}</span>
         {% endfor %}
     </div>
     {% else %}
-    {{ field(**kwargs) | safe }}
+    {{ field(class="form-control form-control-lg", **kwargs) | safe }}
     {% endif %}
 </div>
 

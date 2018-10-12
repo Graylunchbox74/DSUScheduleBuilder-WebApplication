@@ -6,5 +6,6 @@ services:
       - 8080:80
     volumes:
       - ./www/server:/usr/src/app/server
+      - ./www/config:/usr/src/app/config
 
     # add depends_on and volumes later

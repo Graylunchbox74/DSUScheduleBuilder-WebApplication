@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+
+    <meta charset="utf-8">
+    <meta name="description" content="DSU Schedule Builder">
+    <meta name="author" content="Brendan Hansen">
+
+    <title>DSU Schedule Builder</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/core.css" />
+    {% block styles %}
+    {% endblock %}
+
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    {% block scripts %}
+    {% endblock %}
+</head>
+
+<body>
+    {% include 'partials/_navbar.html' %}
+
+    {% block content %}
+    {% endblock %}
+</body>
+
+</html>

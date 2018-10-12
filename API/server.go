@@ -108,6 +108,7 @@ func init() {
 func main() {
 	defer db.Close()
 	router := gin.Default()
+
 	api := router.Group("/api")
 	{
 		user := api.Group("/user")
@@ -158,4 +159,5 @@ func main() {
 		}
 	}
 
+	r.Run(":80")
 }

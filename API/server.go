@@ -1,10 +1,9 @@
 package main
 
 import (
-	"database/sql"
 	"time"
 
-	_ "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -83,20 +82,17 @@ func validateUser(email, password string) bool {
 	encryptedPassword := encryptPassword(password)
 
 	var student Student
-	userWithEmail, err := db.Where(&student, "Email = ? and Password = ?", email, encryptedPassword).Find(&Student)
+	db.Where(&student, "Email = $1 and Password = $2", email, encryptedPassword).Find(&student)
 
-	if err != nil {
-		return false
-	}
 	//if the database returns an object that matches the user then return a success
-	if userWithEmail != nil {
+	if student != nil {
 		return true
 	} else {
 		return false
 	}
 }
 
-var db *sql.DB
+var db *gorm.DB
 
 func init() {
 	db, err := gorm.Open("sqlite3", "test.db")
@@ -128,18 +124,15 @@ func main() {
 			user.POST("/newUser", func(c *gin.Context) {
 				var student Student
 
-				student.Email = c.Context("email")
-				student.Password = c.Context("password")
-				student.FirstName = c.Context("firstName")
-				student.LastName = c.Context("lastName")
+				student.Email = c.PostForm("email")
+				student.Password = c.PostForm("password")
+				student.FirstName = c.PostForm("firstName")
+				student.LastName = c.PostForm("lastName")
 
 				student.Password = encryptPassword(student.Password)
 
-				rows, err := db.Where("email = ?", student.Email).Find(&Student)
-				if err != nil {
-					c.JSON(200, gin.H{"errorMsg": "database error " + err.error})
-				}
-				if rows.Next() {
+				db.Where("email = ?", student.Email).Find(&student)
+				if rows != nil {
 					c.JSON(200, gin.H{"errorMsg": "email already exists"})
 				}
 
@@ -154,7 +147,11 @@ func main() {
 			})
 
 			user.POST("/deleteUser", func(c *gin.Context) {
-				db.Where("email = ?", c.Context("email")).Delete(&Student)
+				var student Student
+				db.Where("email = ?", c.PostForm("email")).Find(&student)
+				if student != nil {
+					db.Delete(&student)
+				}
 			})
 		}
 	}

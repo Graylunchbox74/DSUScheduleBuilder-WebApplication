@@ -1,7 +1,7 @@
-from flask.json import JSONEncoder
+from server.models.base_model import BaseModel
 
 
-class UserModel():
+class UserModel(BaseModel):
     def create(**kwargs):
         """Creates user model. Fields required:
             - email
@@ -13,15 +13,15 @@ class UserModel():
     def get_full_name(json):
         return f"{json['first_name']} {json['last_name']}"
 
-    def __repr__(json):
+    def to_str(json):
         return f"UserModel({json['email']}, {json['first_name']}, {json['last_name']})"
 
     def from_json(json):
         ret = {}
         try:
-            ret['email'] = json['email']
-            ret['first_name'] = json['first_name']
-            ret['last_name'] = json['last_name']
+            ret['email'] = str(json['email'])
+            ret['first_name'] = str(json['first_name'])
+            ret['last_name'] = str(json['last_name'])
             return ret
         except KeyError as e:
-            pass
+            raise RuntimeError('Invalid field in json')

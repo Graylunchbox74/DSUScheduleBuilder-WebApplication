@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,11 +19,11 @@ type Admin struct {
 }
 
 type Student struct {
-	StudentID uint64 `gorm:"primary_key"`
-	Email     string `gorm:"unique"`
-	FirstName string
-	LastName  string
-	Password  string
+	StudentID uint64 `gorm:"primary_key" , json:"studentID"`
+	Email     string `gorm:"unique" , json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Password  string `json:"password"`
 }
 
 type StudentPrograms struct {
@@ -77,31 +78,27 @@ func encryptPassword(password string) string {
 	return password
 }
 
-func validateUser(email, password string) bool {
+func validateUser(email, password string) Student {
 	//encrypt password to compare whith the already encrypted password in the database
 	encryptedPassword := encryptPassword(password)
 
 	var student Student
-	db.Where(&student, "Email = $1 and Password = $2", email, encryptedPassword).Find(&student)
-
 	//if the database returns an object that matches the user then return a success
-	if student != nil {
-		return true
-	} else {
-		return false
-	}
+	db.Where("Email = ? and Password = ?", email, encryptedPassword).First(&student)
+	fmt.Println(email)
+	return student
 }
 
 var db *gorm.DB
 
-func init() {
-	db, err := gorm.Open("sqlite3", "test.db")
+func main() {
+	var err error
+	db, err = gorm.Open("sqlite3", "test.db")
 	if err != nil {
 		panic("Failed to connect to the database")
 	}
-}
+	db.AutoMigrate(&Student{})
 
-func main() {
 	defer db.Close()
 	router := gin.Default()
 
@@ -111,14 +108,12 @@ func main() {
 		{
 			user.GET("/validateUser/:email/:password", func(c *gin.Context) {
 				//get the variables from the request
-				email := c.PostForm("email")
-				password := c.PostForm("password")
+				email := c.Params.ByName("email")
+				password := c.Params.ByName("password")
+				//				fmt.Println(email + " " + password)
 
-				if validateUser(email, password) {
-					c.JSON(200, gin.H{"success": 1})
-				} else {
-					c.JSON(200, gin.H{"success": 0})
-				}
+				c.JSON(200, validateUser(email, password))
+
 			})
 
 			user.POST("/newUser", func(c *gin.Context) {
@@ -131,16 +126,17 @@ func main() {
 
 				student.Password = encryptPassword(student.Password)
 
-				db.Where("email = ?", student.Email).Find(&student)
-				if rows != nil {
-					c.JSON(200, gin.H{"errorMsg": "email already exists"})
-				}
-
 				//send email for verification--riley will insert this
 
 				//the email will have its own call that will create the user in the database
-				db.Create(student)
-				c.JSON(200, gin.H{"errorMsg": ""})
+				err := db.Create(&student).Error
+				if err != nil {
+					fmt.Println(err.Error())
+					c.JSON(200, gin.H{"errorMsg": err})
+				} else {
+					db.Update()
+					c.JSON(200, gin.H{"errorMsg": ""})
+				}
 			})
 
 			user.POST("/emailValidation", func(c *gin.Context) {
@@ -149,12 +145,12 @@ func main() {
 			user.POST("/deleteUser", func(c *gin.Context) {
 				var student Student
 				db.Where("email = ?", c.PostForm("email")).Find(&student)
-				if student != nil {
+				if db.Debug().First(&student, "email = ?", c.PostForm("email")).RecordNotFound() {
 					db.Delete(&student)
 				}
 			})
 		}
 	}
 
-	r.Run(":80")
+	router.Run(":8080")
 }

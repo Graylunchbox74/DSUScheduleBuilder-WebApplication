@@ -1,6 +1,8 @@
 from server import app
 from server import controllers
 from server.models.login_form import LoginForm
+
+import requests
 import flask
 
 
@@ -11,6 +13,7 @@ def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
         flask.session['user'] = True
+        flask.session['views'] = 0
         return flask.redirect(flask.url_for('index'))
 
     context = {
@@ -19,3 +22,10 @@ def login():
     }
 
     return flask.render_template('login.html', **context)
+
+
+@app.route('/logout')
+def logout():
+    del flask.session['user']
+
+    return flask.redirect(flask.url_for('index'))

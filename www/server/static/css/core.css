@@ -9,3 +9,11 @@ body {
     background: #222;
     color: #eee;
 }
+
+main {
+    margin-top: 4rem;
+}
+
+.content-section {
+    padding: .25rem;
+}

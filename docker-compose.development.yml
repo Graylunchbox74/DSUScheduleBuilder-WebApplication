@@ -9,7 +9,7 @@ services:
       - ./www/config:/usr/src/app/config
   api:
     ports:
-      - 8079:80
+      - 8079:8080
       
 
     # add depends_on and volumes later

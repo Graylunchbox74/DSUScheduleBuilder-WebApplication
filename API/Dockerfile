@@ -11,6 +11,6 @@ RUN go get -d -v github.com/jinzhu/gorm/dialects/sqlite
 
 RUN go install -v ./
 
-EXPOSE 80
+EXPOSE 8080
 
-CMD ["server"]
+CMD ["go", "run", "server.go"]

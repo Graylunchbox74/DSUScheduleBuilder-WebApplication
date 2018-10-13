@@ -15,19 +15,19 @@ def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
         # Validate User from DB
+        response = requests.get(f"{app.config['API_ENDPOINT']}/user/validateUser/{login_form.email.data}/{login_form.password.data}")
+        response = response.json()
+        if response['StudentID'] != 0:
+            user = UserModel.create(
+                id=response['StudentID'],
+                email=response['Email'],
+                first_name=response['firstName'],
+                last_name=response['lastName']
+            )
 
-        # Load user info from DB
-
-        # For now, assume creds are correct
-        user = UserModel.create(
-            email=login_form.email.data,
-            first_name="UNSET",
-            last_name="UNSET",
-        )
-
-        flask.session['user'] = user
-        flask.session['views'] = 0
-        return flask.redirect(flask.url_for('index'))
+            flask.session['user'] = user
+            flask.session['views'] = 0
+            return flask.redirect(flask.url_for('index'))
 
     context = {
         "globals": global_context,

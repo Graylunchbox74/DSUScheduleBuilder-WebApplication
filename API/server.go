@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -89,6 +90,12 @@ func validateUser(email, password string) Student {
 	return student
 }
 
+func findUserWithID(id int) Student {
+	var student Student
+	db.Where("studentID = ?", id).First(&student)
+	return student
+}
+
 var db *gorm.DB
 
 func main() {
@@ -98,6 +105,10 @@ func main() {
 		panic("Failed to connect to the database")
 	}
 	db.AutoMigrate(&Student{})
+	db.AutoMigrate(&Admin{})
+	db.AutoMigrate(&StudentPrograms{})
+	db.AutoMigrate(&StudentProgram{})
+	db.AutoMigrate(&Program{})
 
 	defer db.Close()
 	router := gin.Default()
@@ -110,7 +121,6 @@ func main() {
 				//get the variables from the request
 				email := c.Params.ByName("email")
 				password := c.Params.ByName("password")
-				//				fmt.Println(email + " " + password)
 
 				c.JSON(200, validateUser(email, password))
 
@@ -145,9 +155,45 @@ func main() {
 			user.POST("/deleteUser", func(c *gin.Context) {
 				var student Student
 				db.Where("email = ?", c.PostForm("email")).Find(&student)
-				if db.Debug().First(&student, "email = ?", c.PostForm("email")).RecordNotFound() {
-					db.Delete(&student)
+				db.Delete(&student)
+			})
+
+			user.POST("/addStudentProgram", func(c *gin.Context) {
+				stringID := c.PostForm("studentId")
+				id, _ := strconv.Atoi(stringID)
+				student := findUserWithID(id)
+
+				if student.StudentID == 0 {
+					c.JSON(200, gin.H{"errorMsg": "student not found"})
+					return
 				}
+
+				programIDString := c.PostForm("programID")
+				var program Program
+				db.Where("programID = ?", programIDString).First(&program)
+
+				if program.ProgramID == 0 {
+					c.JSON(200, gin.H{"errorMsg": "program not found"})
+					return
+				}
+
+				var studentProgram StudentPrograms
+				studentProgram.StudentID = student.StudentID
+
+				studentProgram.ProgramID = program.ProgramID
+
+				db.Create(&studentProgram)
+				c.JSON(200, gin.H{"errorMsg": ""})
+			})
+		}
+		adm := api.Group("/admin")
+		{
+			adm.POST("/addProgram", func(c *gin.Context) {
+				var program Program
+				program.Major = (c.PostForm("major") == "1")
+				program.Program = c.PostForm("program")
+				program.CatalogYear = c.PostForm("catalogYear")
+
 			})
 		}
 	}

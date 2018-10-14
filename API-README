@@ -28,6 +28,13 @@
                 "" if everything worked
                 "error here" if there was an error
 
+/api/user/removeStudentProgram
+    POST
+        studentID -> int
+        programID -> int
+    returns
+        errorMsg
+            same as others that have errorMsg
 
 /api/admin/addProgram
     POST
@@ -40,3 +47,12 @@
         errorMsg:
             "" if everything worked
             "error here" if there was an error
+
+/api/admin/deleteProgram
+    POST
+        email -> string
+        password ->  string
+        programID -> int
+    returns
+        errorMsg
+            same as others with errorMsg

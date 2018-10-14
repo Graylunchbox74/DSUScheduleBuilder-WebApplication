@@ -204,6 +204,39 @@ func main() {
 
 				c.JSON(200, gin.H{"errorMsg": ""})
 			})
+
+			user.POST("/removeStudentProgram", func(c *gin.Context) {
+				var student Student
+				stringStudentID := c.PostForm("studentID")
+				normalIntID, _ := strconv.Atoi(stringStudentID)
+				db.Where("student_id = ?", normalIntID).First(&student)
+				if student.StudentID == 0 {
+					c.JSON(200, gin.H{"errMsg": "Student not found"})
+					return
+				}
+
+				var program Program
+				stringProgramID := c.PostForm("programID")
+				normalIntID, _ = strconv.Atoi(stringProgramID)
+				db.Where("program_id = ?", normalIntID).First(&program)
+				if program.ProgramID == 0 {
+					c.JSON(200, gin.H{"errMsg": "Program not found"})
+					return
+				}
+
+				var studentToProgram StudentToProgram
+				db.Where("program_id = ? and  student_id = ?", program.ProgramID, student.StudentID).First(&studentToProgram)
+				if studentToProgram.StudentID == 0 {
+					c.JSON(200, gin.H{"errorMsg": "Student is not currently in this program"})
+					return
+				}
+				db.Delete(&studentToProgram)
+
+				var studentProgram StudentProgram
+				db.Where("program_id = ? and student_id = ?", program.ProgramID, student.StudentID).First(&studentProgram)
+				db.Delete(studentProgram)
+				c.JSON(200, gin.H{"errorMsg": ""})
+			})
 		}
 		adm := api.Group("/admin")
 		{
@@ -224,6 +257,20 @@ func main() {
 
 				db.Create(&program)
 
+				c.JSON(200, gin.H{"errorMsg": ""})
+			})
+
+			adm.POST("/deleteProgram", func(c *gin.Context) {
+				var program Program
+				stringID := c.PostForm("programID")
+				tmpID, _ := strconv.Atoi(stringID)
+				program.ProgramID = uint64(tmpID)
+				db.Where("program_id = ?", program.ProgramID).First(&program)
+				if program.ProgramID == 0 {
+					c.JSON(200, gin.H{"errorMsg": "Program not found"})
+					return
+				}
+				db.Delete(&program)
 				c.JSON(200, gin.H{"errorMsg": ""})
 			})
 		}

@@ -27,7 +27,7 @@ type Student struct {
 	Password  string `json:"password"`
 }
 
-type StudentPrograms struct {
+type StudentToProgram struct {
 	ProgramID uint64 `gorm:"foreignkey:ProgramID;association_foreignkey:ProgramID"`
 	StudentID uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
 }
@@ -92,7 +92,8 @@ func validateUser(email, password string) Student {
 
 func findUserWithID(id int) Student {
 	var student Student
-	db.Where("studentID = ?", id).First(&student)
+	db.Where("student_id = ?", id).First(&student)
+	fmt.Println(student.Email)
 	return student
 }
 
@@ -106,7 +107,7 @@ func main() {
 	}
 	db.AutoMigrate(&Student{})
 	db.AutoMigrate(&Admin{})
-	db.AutoMigrate(&StudentPrograms{})
+	db.AutoMigrate(&StudentToProgram{})
 	db.AutoMigrate(&StudentProgram{})
 	db.AutoMigrate(&Program{})
 
@@ -117,10 +118,10 @@ func main() {
 	{
 		user := api.Group("/user")
 		{
-			user.GET("/validateUser/:email/:password", func(c *gin.Context) {
+			user.POST("/validateUser", func(c *gin.Context) {
 				//get the variables from the request
-				email := c.Params.ByName("email")
-				password := c.Params.ByName("password")
+				email := c.PostForm("email")
+				password := c.PostForm("password")
 
 				c.JSON(200, validateUser(email, password))
 
@@ -159,9 +160,10 @@ func main() {
 			})
 
 			user.POST("/addStudentProgram", func(c *gin.Context) {
-				stringID := c.PostForm("studentId")
+				stringID := c.PostForm("studentID")
 				id, _ := strconv.Atoi(stringID)
-				student := findUserWithID(id)
+				var student Student
+				student = findUserWithID(id)
 
 				if student.StudentID == 0 {
 					c.JSON(200, gin.H{"errorMsg": "student not found"})
@@ -170,19 +172,36 @@ func main() {
 
 				programIDString := c.PostForm("programID")
 				var program Program
-				db.Where("programID = ?", programIDString).First(&program)
+				db.Where("program_id = ?", programIDString).First(&program)
 
 				if program.ProgramID == 0 {
 					c.JSON(200, gin.H{"errorMsg": "program not found"})
 					return
 				}
 
-				var studentProgram StudentPrograms
+				var studentPrograms StudentToProgram
+				studentPrograms.StudentID = student.StudentID
+
+				studentPrograms.ProgramID = program.ProgramID
+
+				var testStudentPrograms StudentToProgram
+				db.Where("student_id = ? and program_id = ?", studentPrograms.StudentID, studentPrograms.ProgramID).First(&testStudentPrograms)
+				if testStudentPrograms.ProgramID != 0 {
+					c.JSON(200, gin.H{"errorMsg": "Student already enrolled in this program"})
+					return
+				}
+
+				db.Create(&studentPrograms)
+
+				var studentProgram StudentProgram
+				studentProgram.CatalogYear = program.CatalogYear
+				studentProgram.Major = program.Major
+				studentProgram.Program = program.Program
+				studentProgram.ProgramID = program.ProgramID
 				studentProgram.StudentID = student.StudentID
 
-				studentProgram.ProgramID = program.ProgramID
-
 				db.Create(&studentProgram)
+
 				c.JSON(200, gin.H{"errorMsg": ""})
 			})
 		}
@@ -195,6 +214,17 @@ func main() {
 				tmpCatYear, _ := strconv.Atoi(c.PostForm("catalogYear"))
 				program.CatalogYear = uint64(tmpCatYear)
 
+				var testIfExists Program
+				db.Where("Major = ? and Program = ? and Catalog_Year = ?", program.Major, program.Program, program.CatalogYear).First(&testIfExists)
+
+				if testIfExists.ProgramID != 0 {
+					c.JSON(200, gin.H{"errorMsg": "Program Already Exists"})
+					return
+				}
+
+				db.Create(&program)
+
+				c.JSON(200, gin.H{"errorMsg": ""})
 			})
 		}
 	}

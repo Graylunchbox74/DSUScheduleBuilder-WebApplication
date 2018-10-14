@@ -1,5 +1,9 @@
 /api/user/validateUser/:email/:password
-    GET request, returns 1 if success, 0 if fail
+    POST
+        email
+        password
+    returns
+        student object
 
 /api/user/newUser
     POST

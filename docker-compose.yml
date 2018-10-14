@@ -1,11 +1,11 @@
 version: '3'
 
 services:
+  api:
+    build: ./API
+
   webserver:
     build: ./www
     depends_on:
       - api
-
-  api:
-    build: ./API
     # add depends_on and volumes later

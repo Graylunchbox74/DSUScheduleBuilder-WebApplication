@@ -1,0 +1,63 @@
+{% extends 'partials/_layout.html' %}
+
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/schedule.css') }}" />
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+{% endblock %}
+
+
+{% block content %}
+
+<h1>Schedule</h1>
+<svg id="schedule-svg" style="width: 100%; height: 950px;">
+    <rect x="0" y="0" width="100%" height="100%" style="fill: #333"></rect>
+    <rect x="0%" y="0" width="20%" height="100%" style="fill: #444"></rect>
+    <rect x="20%" y="0" width="20%" height="100%" style="fill: #333"></rect>
+    <rect x="40%" y="0" width="20%" height="100%" style="fill: #444"></rect>
+    <rect x="60%" y="0" width="20%" height="100%" style="fill: #333"></rect>
+    <rect x="80%" y="0" width="20%" height="100%" style="fill: #444"></rect>
+
+    <rect x="0" y="0" width="100%" height="50px" style="fill: rgba(0, 0, 0, .2)"></rect>
+
+    <!-- Days of week -->
+    <g alignment-baseline="middle" text-anchor="middle" class="dow-text">
+        <text x="10%" y="30px">Monday</text>
+        <text x="30%" y="30px">Tuesday</text>
+        <text x="50%" y="30px">Wednesday</text>
+        <text x="70%" y="30px">Thursday</text>
+        <text x="90%" y="30px">Friday</text>
+    </g>
+
+    <!-- Horizontal grid lines -->
+    <g class="grid-line">
+        {% for i in range(0, 15) %}
+        <line x1="0" x2="100%" y1="{{ 50 + 60 * i }}px" y2="{{ 50 + 60 * i}}px" stroke="black" />
+        {% endfor %}
+    </g>
+
+    <line id="timeline" x1="0" y1="0" x2="100%" y2="0" style="display: none" />
+    <text id="timeline-text" x="10px" y="12px" style="display: none">8:00AM</text>
+
+    {% for course in courses %}
+    <g class="course">
+        <rect x="{{ 20 * course.day_of_week }}%" y="{{ (course.start_time - 8) * 60 + 50 }}px" width="19%" height="{{ (course.end_time - course.start_time) * 60}}px"
+            style="fill: {{ course.color }};">
+        </rect>
+        <clipPath id="course-text-clip-{{ loop.index }}">
+            <rect x="{{ 20 * course.day_of_week }}%" y="{{ (course.start_time - 8) * 60 + 50 }}px" width="19%" height="{{ (course.end_time - course.start_time) * 60}}px"></rect>
+            </rect>
+        </clipPath>
+        <text style="clip-path: url(#course-text-clip-{{ loop.index }});" alignment-baseline="hanging" x="{{ 20 * course.day_of_week + 1 }}%"
+            y="{{ (course.start_time - 8) * 60 + 55}}px">{{course.first_row}}</text>
+        <text style="clip-path: url(#course-text-clip-{{ loop.index }});" alignment-baseline="hanging" x="{{ 20 * course.day_of_week + 1 }}%"
+            y="{{ (course.start_time - 8) * 60 + 75}}px">{{course.second_row}}</text>
+    </g>
+    {% endfor %}
+
+
+</svg>
+
+{% endblock %}

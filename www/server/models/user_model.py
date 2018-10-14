@@ -15,7 +15,7 @@ class UserModel(BaseModel):
         return f"{json['first_name']} {json['last_name']}"
 
     def to_str(json):
-        return f"UserModel({json['email']}, {json['first_name']}, {json['last_name']})"
+        return f"UserModel({json['id']}, {json['email']}, {json['first_name']}, {json['last_name']})"
 
     def from_json(json):
         ret = {}

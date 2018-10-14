@@ -15,3 +15,4 @@ app.config.from_envvar('APP_CONFIG')
 from server.controllers import home_controller
 from server.controllers import login_controller
 from server.controllers import register_controller
+from server.controllers import schedule_controller

@@ -14,7 +14,8 @@ def index():
 
     context = {
         "globals": global_context,
-        "views": views
+        "selected_tab": "home",
+        "views": views,
     }
 
     return flask.render_template('index.html', **context)

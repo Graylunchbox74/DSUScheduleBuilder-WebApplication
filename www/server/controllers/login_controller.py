@@ -15,7 +15,11 @@ def login():
     login_form = LoginForm()
     if login_form.validate_on_submit():
         # Validate User from DB
-        response = requests.get(f"{app.config['API_ENDPOINT']}/user/validateUser/{login_form.email.data}/{login_form.password.data}")
+        data = {
+            "email": login_form.email.data,
+            "password": login_form.password.data,
+        }
+        response = requests.post(f"{app.config['API_ENDPOINT']}/user/validateUser", data=data)
         response = response.json()
         if response['StudentID'] != 0:
             user = UserModel.create(
@@ -28,6 +32,8 @@ def login():
             flask.session['user'] = user
             flask.session['views'] = 0
             return flask.redirect(flask.url_for('index'))
+        else:
+            flask.flash(f"Invalid email / password", 'danger')
 
     context = {
         "globals": global_context,

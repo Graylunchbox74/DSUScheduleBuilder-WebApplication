@@ -14,3 +14,25 @@
         parameters:
             email
 
+/api/user/addStudentProgram
+    POST
+        studentID -> int
+        programID -> int
+
+    returns
+        errorMsg:
+                "" if everything worked
+                "error here" if there was an error
+
+
+/api/admin/addProgram
+    POST
+        email -> string
+        password -> string
+        major -> 1 (if it is a major) 0 (if not)
+        program -> string (the name of the program)
+        catalogYear -> int
+    returns
+        errorMsg:
+            "" if everything worked
+            "error here" if there was an error

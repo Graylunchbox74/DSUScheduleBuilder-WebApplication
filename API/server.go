@@ -36,7 +36,7 @@ type Program struct {
 	ProgramID   uint64 `gorm:"primary_key"`
 	CatalogYear uint64
 	Major       bool
-	Program     uint64
+	Program     string
 }
 
 type StudentProgram struct {
@@ -44,7 +44,7 @@ type StudentProgram struct {
 	StudentID   uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
 	CatalogYear uint64
 	Major       bool
-	Program     uint64
+	Program     string
 }
 
 type ProgramRequirement struct {
@@ -192,7 +192,8 @@ func main() {
 				var program Program
 				program.Major = (c.PostForm("major") == "1")
 				program.Program = c.PostForm("program")
-				program.CatalogYear = c.PostForm("catalogYear")
+				tmpCatYear, _ := strconv.Atoi(c.PostForm("catalogYear"))
+				program.CatalogYear = uint64(tmpCatYear)
 
 			})
 		}

@@ -32,7 +32,7 @@ type StudentToProgram struct {
 	StudentID uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
 }
 
-type StudnetToCourse struct {
+type StudentToCourse struct {
 	CourseID  uint64 `gorm:"foreignkey:courseID;association_foreignkey:CourseID"`
 	StudentID uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
 }
@@ -115,6 +115,8 @@ func main() {
 	db.AutoMigrate(&StudentToProgram{})
 	db.AutoMigrate(&StudentProgram{})
 	db.AutoMigrate(&Program{})
+	db.AutoMigrate(&StudentToCourse{})
+	db.AutoMigrate(&Course{})
 
 	defer db.Close()
 	router := gin.Default()
@@ -243,15 +245,99 @@ func main() {
 				c.JSON(200, gin.H{"errorMsg": ""})
 			})
 
-			user.GET("/getEnrolledCourses", func(c *gin.Context) {
-				//				var course []Course
-				// stringID := c.Params.ByName("studentID")
-				// studentID, _ := strconv.Atoi(stringID)
-				// var studentToCourse []StudnetToCourse
-				// db.Where("student_id = ?", studentID).Find(&studentToCourse)
-				var users []Student
-				db.Take(&users)
-				c.JSON(200, users)
+			user.GET("/getEnrolledCourses/:studentID", func(c *gin.Context) {
+				var courses []Course
+				var studentToCourses []StudentToCourse
+
+				stringID := c.Params.ByName("studentID")
+				studentID, _ := strconv.Atoi(stringID)
+				db.Where("student_id = ?", studentID).Find(&studentToCourses)
+				if len(studentToCourses) == 0 {
+					c.JSON(200, courses)
+				}
+
+				var singleCourse Course
+				for _, current := range studentToCourses {
+					singleCourse = Course{}
+					db.Where("course_id = ?", current.CourseID).Find(&singleCourse)
+					if singleCourse.CourseID != 0 {
+						courses = append(courses, singleCourse)
+					}
+				}
+
+				c.JSON(200, courses)
+
+				// c.JSON(200, courses)
+			})
+
+			user.POST("/enrollInCourse", func(c *gin.Context) {
+				userID, _ := strconv.Atoi(c.PostForm("studentID"))
+				courseID, _ := strconv.Atoi(c.PostForm("courseID"))
+
+				//check that student is not already enrolled in this course
+				var studentToCourse StudentToCourse
+				db.Where("student_id = ? and course_id = ?", userID, courseID).First(&studentToCourse)
+				if studentToCourse.CourseID != 0 {
+					c.JSON(200, gin.H{"errorMsg": "Student already enrolled in this course"})
+					return
+				}
+
+				//get the course to make sure it exists
+				var course Course
+				db.Where("course_id = ?", courseID).First(&course)
+				if course.CourseID == 0 {
+					c.JSON(200, gin.H{"errorMsg": "Course does not exist with this id"})
+					return
+				}
+
+				//check that the student exists
+				var student Student
+				db.Where("student_id = ?", userID).First(&student)
+				if student.StudentID == 0 {
+					c.JSON(200, gin.H{"errorMsg": "Student does not exist with this id"})
+				}
+
+				//now we need to make sure that the class does not conflict with other classes
+				var studentToCourses []StudentToCourse
+				var courseToCompare Course
+				db.Where("student_id = ?", userID).Find(&studentToCourses)
+				for _, currentCourse := range studentToCourses {
+					db.Where("course_id = ?", currentCourse.CourseID).First(&courseToCompare)
+
+					//also need to check for dates on this
+
+					//check if times interfear at all
+					if (courseToCompare.StartTime <= course.StartTime && courseToCompare.EndTime >= course.StartTime) ||
+						(courseToCompare.StartTime <= course.EndTime && courseToCompare.EndTime >= course.EndTime) ||
+						(courseToCompare.StartTime <= course.StartTime && courseToCompare.EndTime >= course.EndTime) ||
+						(courseToCompare.StartTime >= course.StartTime && courseToCompare.EndTime <= course.EndTime) {
+						//check if they happen on the same day
+						daysForRegisteringCourse := strconv.Itoa(int(course.DaysOfWeek))
+						daysForCurrentCourse := strconv.Itoa(int(courseToCompare.DaysOfWeek))
+						for i := 0; i < 5; i++ {
+							if daysForCurrentCourse[i] == daysForRegisteringCourse[i] && daysForCurrentCourse[i] == '1' {
+								c.JSON(200, gin.H{"errorMsg": "Course conflicts with " + courseToCompare.CourseName})
+								return
+							}
+						}
+					}
+				}
+
+				//do some major stuff here
+
+				//actually add the course
+				var newStudentToCourse StudentToCourse
+				newStudentToCourse.CourseID = uint64(courseID)
+				newStudentToCourse.StudentID = uint64(userID)
+
+				db.Create(&newStudentToCourse)
+				c.JSON(200, gin.H{"errorMsg": ""})
+			})
+
+			user.POST("/dropCourse", func(c *gin.Context) {
+				studentID, _ := strconv.Atoi(c.PostForm("studentID"))
+				courseID, _ := strconv.Atoi(c.PostForm("courseID"))
+				db.Where("student_id = ? and course_id = ?", studentID, courseID).Delete(&StudentToCourse{})
 			})
 		}
 		adm := api.Group("/admin")
@@ -294,9 +380,36 @@ func main() {
 				var course Course
 				course.CollegeName = c.PostForm("collegeName")
 
+				tmpString := c.PostForm("courseCode")
+				tmp, _ := strconv.Atoi(tmpString)
+				course.CourseCode = uint64(tmp)
+
+				course.CourseName = c.PostForm("courseName")
+
+				tmpString = c.PostForm("credits")
+				tmp, _ = strconv.Atoi(tmpString)
+				course.Credits = uint64(tmp)
+
+				tmpString = c.PostForm("daysOfWeek")
+				tmp, _ = strconv.Atoi(tmpString)
+				course.DaysOfWeek = uint64(tmp)
+
+				tmpString = c.PostForm("endTime")
+				tmp, _ = strconv.Atoi(tmpString)
+				course.EndTime = uint64(tmp)
+
+				course.Location = c.PostForm("location")
+
+				tmpString = c.PostForm("credits")
+				tmp, _ = strconv.Atoi(tmpString)
+				course.StartTime = uint64(tmp)
+
+				course.Teacher = c.PostForm("teacher")
+
+				db.Create(&course)
 			})
 		}
 	}
 
-	router.Run(":8080")
+	router.Run(":8081")
 }

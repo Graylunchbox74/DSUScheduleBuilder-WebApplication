@@ -32,6 +32,11 @@ type StudentToProgram struct {
 	StudentID uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
 }
 
+type StudnetToCourse struct {
+	CourseID  uint64 `gorm:"foreignkey:courseID;association_foreignkey:CourseID"`
+	StudentID uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
+}
+
 type Program struct {
 	ProgramID   uint64 `gorm:"primary_key"`
 	CatalogYear uint64
@@ -237,6 +242,17 @@ func main() {
 				db.Delete(studentProgram)
 				c.JSON(200, gin.H{"errorMsg": ""})
 			})
+
+			user.GET("/getEnrolledCourses", func(c *gin.Context) {
+				//				var course []Course
+				// stringID := c.Params.ByName("studentID")
+				// studentID, _ := strconv.Atoi(stringID)
+				// var studentToCourse []StudnetToCourse
+				// db.Where("student_id = ?", studentID).Find(&studentToCourse)
+				var users []Student
+				db.Take(&users)
+				c.JSON(200, users)
+			})
 		}
 		adm := api.Group("/admin")
 		{
@@ -272,6 +288,12 @@ func main() {
 				}
 				db.Delete(&program)
 				c.JSON(200, gin.H{"errorMsg": ""})
+			})
+
+			adm.POST("/addCourse", func(c *gin.Context) {
+				var course Course
+				course.CollegeName = c.PostForm("collegeName")
+
 			})
 		}
 	}

@@ -15,5 +15,6 @@
         {{ render_field(form.confirm_password) }}
         {{ form.submit(class="btn btn-primary") }}
     </form>
+    <small class="mt-4">Have an account? <a href="{{ url_for('login') }}">Login</a></small>
 </div>
 {% endblock %}

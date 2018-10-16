@@ -1,9 +1,8 @@
 from server import app
 from server import controllers
-from server.models.login_form import LoginForm
-from server.models.user_model import UserModel
+from server.models.forms.login_form import LoginForm
+from server.facades import user_facade
 
-import requests
 import flask
 
 
@@ -14,29 +13,17 @@ def login():
 
     login_form = LoginForm()
     if login_form.validate_on_submit():
+
         # Validate User from DB
-        data = {
-            "email": login_form.email.data,
-            "password": login_form.password.data,
-        }
-
-        try:
-            response = requests.post(f"{app.config['API_ENDPOINT']}/user/validateUser", data=data)
-            response = response.json()
-            if response['StudentID'] != 0:
-                user = UserModel.create(
-                    id=response['StudentID'],
-                    email=response['Email'],
-                    first_name=response['firstName'],
-                    last_name=response['lastName']
-                )
-
+        (validated, user, err) = user_facade.validate_user(login_form.email.data, login_form.password.data)
+        if not err:
+            if validated:
                 flask.session['user'] = user
                 flask.session['views'] = 0
                 return flask.redirect(flask.url_for('index'))
             else:
                 flask.flash(f"Invalid email or password. Please try again.", 'danger')
-        except:
+        else:
             flask.flash(f"An error occurred when logging in. Please try again later.", "danger")
 
     context = {

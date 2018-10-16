@@ -19,21 +19,25 @@ def login():
             "email": login_form.email.data,
             "password": login_form.password.data,
         }
-        response = requests.post(f"{app.config['API_ENDPOINT']}/user/validateUser", data=data)
-        response = response.json()
-        if response['StudentID'] != 0:
-            user = UserModel.create(
-                id=response['StudentID'],
-                email=response['Email'],
-                first_name=response['firstName'],
-                last_name=response['lastName']
-            )
 
-            flask.session['user'] = user
-            flask.session['views'] = 0
-            return flask.redirect(flask.url_for('index'))
-        else:
-            flask.flash(f"Invalid email / password", 'danger')
+        try:
+            response = requests.post(f"{app.config['API_ENDPOINT']}/user/validateUser", data=data)
+            response = response.json()
+            if response['StudentID'] != 0:
+                user = UserModel.create(
+                    id=response['StudentID'],
+                    email=response['Email'],
+                    first_name=response['firstName'],
+                    last_name=response['lastName']
+                )
+
+                flask.session['user'] = user
+                flask.session['views'] = 0
+                return flask.redirect(flask.url_for('index'))
+            else:
+                flask.flash(f"Invalid email or password. Please try again.", 'danger')
+        except:
+            flask.flash(f"An error occurred when logging in. Please try again later.", "danger")
 
     context = {
         "globals": global_context,
@@ -48,5 +52,6 @@ def login():
 def logout():
     if flask.session.get('user') is not None:
         del flask.session['user']
+        flask.flash("Successfully logged out.", "success")
 
     return flask.redirect(flask.url_for('index'))

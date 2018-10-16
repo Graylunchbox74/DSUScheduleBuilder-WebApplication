@@ -9,13 +9,13 @@
     <meta name="author" content="Brendan Hansen">
 
     <title>{{ globals.brand_name }}</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.css') }} " />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/lib/bootstrap.css') }} " />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/core.css') }} " />
     {% block styles %}
     {% endblock %}
 
-    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/lib/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/lib/bootstrap.min.js') }}"></script>
     {% block scripts %}
     {% endblock %}
 </head>
@@ -28,6 +28,7 @@
     <main role="main" class="container">
         <div class="row pt-4">
             <div class="col-md-12">
+                {% include 'partials/_flashmessage.html' %}
                 {% block content %}
                 {% endblock %}
             </div>

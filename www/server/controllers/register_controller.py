@@ -20,12 +20,19 @@ def register():
             'lastName': register_form.last_name.data,
         }
 
-        response = requests.post(f"{app.config['API_ENDPOINT']}/user/newUser", data=data)
-        response = response.json()
-        if response['errorMsg'] == "":
-            return flask.redirect(flask.url_for('login'))
-        else:
-            flask.flash(f"An error occured creating your account. Please try again later.")
+        try:
+            response = requests.post(f"{app.config['API_ENDPOINT']}/user/newUser", data=data)
+            response = response.json()
+            if response['errorMsg'] == "":
+                flask.flash(f"Successfully created your account. You may now log in.", "success")
+                return flask.redirect(flask.url_for('login'))
+            else:
+                raise ""
+        except:
+            flask.flash(f"An error occured creating your account. Please try again later.", "danger")
+    else:
+        flask.flash(
+            "Please make sure all fields are filled out correctly.", "danger")
 
     context = {
         "globals": global_context,

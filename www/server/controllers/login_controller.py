@@ -1,6 +1,7 @@
 from server import app
 from server import controllers
 from server.models.forms.login_form import LoginForm
+from server.models.utils import facade_result_codes
 from server.facades import user_facade
 
 import flask
@@ -15,14 +16,14 @@ def login():
     if login_form.validate_on_submit():
 
         # Validate User from DB
-        (validated, user, err) = user_facade.validate_user(login_form.email.data, login_form.password.data)
-        if not err:
-            if validated:
-                flask.session['user'] = user
-                flask.session['views'] = 0
-                return flask.redirect(flask.url_for('index'))
-            else:
-                flask.flash(f"Invalid email or password. Please try again.", 'danger')
+        (code, user) = user_facade.validate_user(login_form.email.data, login_form.password.data)
+
+        if code == facade_result_codes.SUCCESS:
+            flask.session['user'] = user
+            flask.session['views'] = 0
+            return flask.redirect(flask.url_for('index'))
+        elif code == facade_result_codes.NOT_AUTHENTICATED:
+            flask.flash(f"Invalid email or password. Please try again.", 'danger')
         else:
             flask.flash(f"An error occurred when logging in. Please try again later.", "danger")
 

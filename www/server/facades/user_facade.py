@@ -1,5 +1,6 @@
 from server import app
 from server.models.user_model import UserModel
+from server.models.utils import facade_result_codes as FRC
 import requests
 
 
@@ -17,8 +18,8 @@ def validate_user(email, password):
 
     Returns
     -------
-        (bool, UserModel, bool)
-        Tuple of is validated, user model, and if an error occurred
+        (int, UserModel)
+        Tuple of facade result code and user model.
     """
 
     data = {
@@ -30,10 +31,14 @@ def validate_user(email, password):
         response = requests.post(f"{app.config['API_ENDPOINT']}/user/validateUser", data=data)
         json_response = response.json()
 
-        is_validated = response.status_code == 200 and json_response['StudentID'] != 0
+        # Assume not authenticated until proved otherwise
+        result_code = FRC.NOT_AUTHENTICATED
+
+        if response.status_code == 200 and json_response['StudentID'] != 0:
+            result_code = FRC.SUCCESS
 
         user = {}
-        if is_validated:
+        if result_code == FRC.SUCCESS:
             user = UserModel.create(
                 id=json_response['StudentID'],
                 email=json_response['Email'],
@@ -41,9 +46,9 @@ def validate_user(email, password):
                 last_name=json_response['lastName']
             )
 
-        return (is_validated, user, False)
+        return (result_code, user)
     except:
-        return (False, {}, True)
+        return (FRC.CONNECTION_ERROR, {})
 
 
 def register_user(**kwargs):
@@ -66,8 +71,8 @@ def register_user(**kwargs):
 
     Returns
     -------
-        (bool, json, bool)
-        Tuple of successful, the json response and if an error occurred
+        (int, json)
+        Tuple of facade result code and the json response.
     """
     data = kwargs
 
@@ -75,7 +80,14 @@ def register_user(**kwargs):
         response = requests.post(f"{app.config['API_ENDPOINT']}/user/newUser", data=data)
         json_response = response.json()
 
-        success = response.status_code == 200 and json_response.get('errorMsg', "") == ""
-        return (success, json_response, False)
+        result_code = -1
+
+        if result_code == 400:
+            result_code = FRC.SERVER_ERROR
+
+        if result_code == 200:
+            result_code = FRC.SUCCESS
+
+        return (result_code, json_response)
     except:
-        return (False, {}, True)
+        return (FRC.CONNECTION_ERROR, {})

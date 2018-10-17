@@ -7,39 +7,47 @@ from server.facades import user_facade
 import flask
 
 
-@app.route('/login', methods=['GET', 'POST'])
-@controllers.logout_required
-def login():
-    global_context = controllers.get_global_context_variables()
+class LoginController(controllers.BaseController):
+    decorators = [controllers.logout_required]
 
-    login_form = LoginForm()
-    if login_form.validate_on_submit():
+    def get(self):
+        login_form = LoginForm()
 
-        # Validate User from DB
-        (code, user) = user_facade.validate_user(login_form.email.data, login_form.password.data)
+        context = {
+            "form": login_form
+        }
 
-        if code == facade_result_codes.SUCCESS:
-            flask.session['user'] = user
-            flask.session['views'] = 0
-            return flask.redirect(flask.url_for('index'))
-        elif code == facade_result_codes.NOT_AUTHENTICATED:
-            flask.flash(f"Invalid email or password. Please try again.", 'danger')
-        else:
-            flask.flash(f"An error occurred when logging in. Please try again later.", "danger")
+        return flask.render_template('login.html', **context)
 
-    context = {
-        "globals": global_context,
-        "form": login_form
-    }
+    def post(self):
+        login_form = LoginForm()
+        if login_form.validate_on_submit():
 
-    return flask.render_template('login.html', **context)
+            # Validate User from DB
+            (code, user) = user_facade.validate_user(login_form.email.data, login_form.password.data)
+
+            if code == facade_result_codes.SUCCESS:
+                flask.session['user'] = user
+                flask.session['views'] = 0
+                return flask.redirect(flask.url_for('index'))
+            elif code == facade_result_codes.NOT_AUTHENTICATED:
+                flask.flash(f"Invalid email or password. Please try again.", 'danger')
+            else:
+                flask.flash(f"An error occurred when logging in. Please try again later.", "danger")
+
+        context = {
+            "form": login_form
+        }
+
+        return flask.render_template('login.html', **context)
 
 
-@app.route('/logout')
-@controllers.login_required
-def logout():
-    if flask.session.get('user') is not None:
-        del flask.session['user']
-        flask.flash("Successfully logged out.", "success")
+class LogoutController(controllers.BaseController):
+    decorators = [controllers.login_required]
 
-    return flask.redirect(flask.url_for('index'))
+    def get(self):
+        if flask.session.get('user') is not None:
+            del flask.session['user']
+            flask.flash("Successfully logged out.", "success")
+
+        return flask.redirect(flask.url_for('index'))

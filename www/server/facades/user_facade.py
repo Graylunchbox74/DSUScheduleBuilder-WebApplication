@@ -80,12 +80,9 @@ def register_user(**kwargs):
         response = requests.post(f"{app.config['API_ENDPOINT']}/user/newUser", data=data)
         json_response = response.json()
 
-        result_code = -1
+        result_code = FRC.SERVER_ERROR
 
-        if result_code == 400:
-            result_code = FRC.SERVER_ERROR
-
-        if result_code == 200:
+        if response.status_code == 200:
             result_code = FRC.SUCCESS
 
         return (result_code, json_response)

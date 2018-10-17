@@ -4,16 +4,24 @@ from server import app
 
 from server.models.user_model import UserModel
 
+from flask.views import MethodView
 
-def get_global_context_variables():
-    return {
+
+class BaseController(MethodView):
+    pass
+
+
+# Injects all global variables into the scope of every template
+@app.context_processor
+def inject_globals():
+    return dict(globals={
         "brand_name": app.config['BRAND_NAME'],
 
         # This allows the Model functions to be accessable from the view
         "models": {
             "user": UserModel
         }
-    }
+    })
 
 
 # Route helpers

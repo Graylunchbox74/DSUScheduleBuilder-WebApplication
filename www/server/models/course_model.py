@@ -28,7 +28,7 @@ class CourseModel(BaseModel):
             ret['course_id'] = int(data['course_id'])
             ret['course_code'] = int(data['course_code'])
             ret['course_name'] = str(data['course_name'])
-            ret['course_credits'] = int(data['credits'])
+            ret['credits'] = int(data['credits'])
 
             ret['days_of_week'] = int(data['days_of_week'])
             ret['start_time'] = int(data['start_time'])

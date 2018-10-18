@@ -149,6 +149,7 @@ func main() {
 		panic("Failed to connect to the database")
 	}
 	db.AutoMigrate(&Student{})
+	db.AutoMigrate(&SessionToken{})
 	db.AutoMigrate(&Admin{})
 	db.AutoMigrate(&StudentProgram{})
 	db.AutoMigrate(&Program{})

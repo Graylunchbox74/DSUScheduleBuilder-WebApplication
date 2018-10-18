@@ -75,7 +75,12 @@ def register_user(**kwargs):
         (int, json)
         Tuple of facade result code and the json response.
     """
-    data = kwargs
+    data = {
+        "email": kwargs['email'],
+        "password": kwargs['password'],
+        "firstName": kwargs['first_name'],
+        "lastName": kwargs['last_name'],
+    }
 
     try:
         response = requests.post(f"{app.config['API_ENDPOINT']}/user/newUser", data=data)

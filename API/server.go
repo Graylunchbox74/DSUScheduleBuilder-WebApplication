@@ -540,6 +540,8 @@ func main() {
 
 				course.Teacher = c.PostForm("teacher")
 
+				course.Semester = c.PostForm("semester")
+
 				db.Create(&course)
 			})
 		}

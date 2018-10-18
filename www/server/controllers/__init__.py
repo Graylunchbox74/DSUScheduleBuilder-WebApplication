@@ -26,11 +26,6 @@ class BaseController(MethodView):
 def inject_globals():
     return dict(globals={
         "brand_name": app.config['BRAND_NAME'],
-
-        # This allows the Model functions to be accessable from the view
-        "models": {
-            "user": UserModel
-        }
     })
 
 

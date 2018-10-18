@@ -86,7 +86,7 @@ type returnStudent struct {
 	Email     string `json:"email"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
-	Token     string `json:token`
+	Token     string `json:"token"`
 }
 
 //fundamental functions

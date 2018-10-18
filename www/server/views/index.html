@@ -4,5 +4,5 @@
 {% endblock %}
 
 {% block content %}
-<h1>HI {{ globals.models.user.get_full_name(session['user']) }}!!</h1>
+<h1>HI {{ user.get_full_name() }}!!</h1>
 {% endblock %}

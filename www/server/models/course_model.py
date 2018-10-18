@@ -17,31 +17,47 @@ class CourseModel(BaseModel):
             - location
             - teacher
         """
-        return CourseModel.from_json(kwargs)
+        course = CourseModel()
+        course.from_json(kwargs)
+        return course
 
     def to_str(data):
         return f"CourseModel({data['course_id']}, {data['course_code']}, {data['course_name']})"
 
-    def from_json(data):
-        ret = {}
-        try:
-            ret['course_id'] = int(data['course_id'])
-            ret['course_code'] = int(data['course_code'])
-            ret['course_name'] = str(data['course_name'])
-            ret['credits'] = int(data['credits'])
+    def to_json(self):
+        return {
+            "course_id": self.course_id,
+            "course_code": self.course_code,
+            "course_name": self.course_name,
+            "credits": self.credits,
+            "days_of_week": self.days_of_week,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "college_name": self.college_name,
+            "location": self.location,
+            "teacher": self.teacher,
+        }
 
-            ret['days_of_week'] = int(data['days_of_week'])
-            ret['start_time'] = int(data['start_time'])
-            ret['end_time'] = int(data['end_time'])
+    def from_json(self, data):
+        try:
+            self.course_id = int(data['course_id'])
+            self.course_code = int(data['course_code'])
+            self.course_name = str(data['course_name'])
+            self.credits = int(data['credits'])
+
+            self.days_of_week = int(data['days_of_week'])
+            self.start_time = int(data['start_time'])
+            self.end_time = int(data['end_time'])
 
             # These should be UTC, not str
-            ret['start_date'] = str(data['start_date'])
-            ret['end_date'] = int(data['end_date'])
+            self.start_date = str(data['start_date'])
+            self.end_date = int(data['end_date'])
 
-            ret['college_name'] = str(data['college_name'])
-            ret['location'] = str(data['location'])
-            ret['teacher'] = str(data['teacher'])
+            self.college_name = str(data['college_name'])
+            self.location = str(data['location'])
+            self.teacher = str(data['teacher'])
 
-            return ret
         except KeyError:
             raise RuntimeError('Invalid field in json')

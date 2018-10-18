@@ -27,7 +27,7 @@ class LoginController(controllers.BaseController):
             (code, user) = user_facade.validate_user(login_form.email.data, login_form.password.data)
 
             if code == facade_result_codes.SUCCESS:
-                flask.session['user'] = user
+                flask.session['user'] = user.to_json()
                 flask.session['views'] = 0
                 return flask.redirect(flask.url_for('index'))
             elif code == facade_result_codes.NOT_AUTHENTICATED:

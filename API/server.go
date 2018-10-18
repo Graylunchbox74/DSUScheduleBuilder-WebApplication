@@ -212,6 +212,7 @@ func main() {
 			})
 
 			user.POST("/deleteUser", func(c *gin.Context) {
+				token := c.PostForm("token")
 				var student Student
 				db.Where("email = ?", c.PostForm("email")).Find(&student)
 				db.Delete(&student)

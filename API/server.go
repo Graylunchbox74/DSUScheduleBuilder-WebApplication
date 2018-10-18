@@ -138,6 +138,19 @@ func findUserWithID(id int) Student {
 	return student
 }
 
+func findStudentGivenToken(token string) Student {
+	var student Student
+	var sessiontoken SessionToken
+	db.Where(SessionToken{StudentID: 0, Token: token}).First(&sessiontoken)
+
+	if sessiontoken.StudentID == 0 {
+		return student
+	}
+
+	db.Where(Student{StudentID: sessiontoken.StudentID}).First(&student)
+	return student
+}
+
 var db *gorm.DB
 
 func main() {
@@ -214,15 +227,23 @@ func main() {
 			user.POST("/deleteUser", func(c *gin.Context) {
 				token := c.PostForm("token")
 				var student Student
-				db.Where("email = ?", c.PostForm("email")).Find(&student)
+				student = findStudentGivenToken(token)
+				if student.StudentID == 0 {
+					c.JSON(401, gin.H{"errorMsg": "student not found"})
+					return
+				}
+
 				db.Delete(&student)
 			})
 
 			user.POST("/addStudentProgram", func(c *gin.Context) {
-				stringID := c.PostForm("studentID")
-				id, _ := strconv.Atoi(stringID)
+				token := c.PostForm("token")
 				var student Student
-				student = findUserWithID(id)
+				student = findStudentGivenToken(token)
+				if student.StudentID == 0 {
+					c.JSON(401, gin.H{"errorMsg": "student not found"})
+					return
+				}
 
 				if student.StudentID == 0 {
 					c.JSON(200, gin.H{"errorMsg": "student not found"})
@@ -265,18 +286,17 @@ func main() {
 			})
 
 			user.POST("/removeStudentProgram", func(c *gin.Context) {
+				token := c.PostForm("token")
 				var student Student
-				stringStudentID := c.PostForm("studentID")
-				normalIntID, _ := strconv.Atoi(stringStudentID)
-				db.Where("student_id = ?", normalIntID).First(&student)
+				student = findStudentGivenToken(token)
 				if student.StudentID == 0 {
-					c.JSON(200, gin.H{"errMsg": "Student not found"})
+					c.JSON(401, gin.H{"errorMsg": "student not found"})
 					return
 				}
 
 				var program Program
 				stringProgramID := c.PostForm("programID")
-				normalIntID, _ = strconv.Atoi(stringProgramID)
+				normalIntID, _ := strconv.Atoi(stringProgramID)
 				db.Where("program_id = ?", normalIntID).First(&program)
 				if program.ProgramID == 0 {
 					c.JSON(200, gin.H{"errMsg": "Program not found"})
@@ -301,9 +321,14 @@ func main() {
 				var courses []Course
 				var studentToCourses []StudentToCourse
 
-				stringID := c.Params.ByName("studentID")
-				studentID, _ := strconv.Atoi(stringID)
-				db.Where("student_id = ?", studentID).Find(&studentToCourses)
+				token := c.Params.ByName("token")
+				var student Student
+				student = findStudentGivenToken(token)
+				if student.StudentID == 0 {
+					c.JSON(401, gin.H{"errorMsg": "student not found"})
+					return
+				}
+				db.Where("student_id = ?", student.StudentID).Find(&studentToCourses)
 				if len(studentToCourses) == 0 {
 					c.JSON(200, courses)
 				}
@@ -323,12 +348,18 @@ func main() {
 			})
 
 			user.POST("/enrollInCourse", func(c *gin.Context) {
-				userID, _ := strconv.Atoi(c.PostForm("studentID"))
+				token := c.PostForm("token")
+				var student Student
+				student = findStudentGivenToken(token)
+				if student.StudentID == 0 {
+					c.JSON(401, gin.H{"errorMsg": "student not found"})
+					return
+				}
 				courseID, _ := strconv.Atoi(c.PostForm("courseID"))
 
 				//check that student is not already enrolled in this course
 				var studentToCourse StudentToCourse
-				db.Where("student_id = ? and course_id = ?", userID, courseID).First(&studentToCourse)
+				db.Where("student_id = ? and course_id = ?", student.StudentID, courseID).First(&studentToCourse)
 				if studentToCourse.CourseID != 0 {
 					c.JSON(200, gin.H{"errorMsg": "Student already enrolled in this course"})
 					return
@@ -341,18 +372,10 @@ func main() {
 					c.JSON(200, gin.H{"errorMsg": "Course does not exist with this id"})
 					return
 				}
-
-				//check that the student exists
-				var student Student
-				db.Where("student_id = ?", userID).First(&student)
-				if student.StudentID == 0 {
-					c.JSON(200, gin.H{"errorMsg": "Student does not exist with this id"})
-				}
-
 				//now we need to make sure that the class does not conflict with other classes
 				var studentToCourses []StudentToCourse
 				var courseToCompare Course
-				db.Where("student_id = ?", userID).Find(&studentToCourses)
+				db.Where("student_id = ?", student.StudentID).Find(&studentToCourses)
 				for _, currentCourse := range studentToCourses {
 					db.Where("course_id = ?", currentCourse.CourseID).First(&courseToCompare)
 
@@ -380,16 +403,22 @@ func main() {
 				//actually add the course
 				var newStudentToCourse StudentToCourse
 				newStudentToCourse.CourseID = uint64(courseID)
-				newStudentToCourse.StudentID = uint64(userID)
+				newStudentToCourse.StudentID = uint64(student.StudentID)
 
 				db.Create(&newStudentToCourse)
 				c.JSON(200, gin.H{"errorMsg": ""})
 			})
 
 			user.POST("/dropCourse", func(c *gin.Context) {
-				studentID, _ := strconv.Atoi(c.PostForm("studentID"))
+				token := c.PostForm("token")
+				var student Student
+				student = findStudentGivenToken(token)
+				if student.StudentID == 0 {
+					c.JSON(401, gin.H{"errorMsg": "student not found"})
+					return
+				}
 				courseID, _ := strconv.Atoi(c.PostForm("courseID"))
-				db.Where("student_id = ? and course_id = ?", studentID, courseID).Delete(&StudentToCourse{})
+				db.Where("student_id = ? and course_id = ?", student.StudentID, courseID).Delete(&StudentToCourse{})
 			})
 		}
 		adm := api.Group("/admin")

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -19,17 +20,17 @@ type Admin struct {
 	Password  string
 }
 
+type SessionToken struct {
+	StudentID uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
+	Token     string `gorm:"unique"`
+}
+
 type Student struct {
 	StudentID uint64 `gorm:"primary_key" , json:"studentID"`
 	Email     string `gorm:"unique" , json:"email"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 	Password  string `json:"password"`
-}
-
-type StudentToProgram struct {
-	ProgramID uint64 `gorm:"foreignkey:ProgramID;association_foreignkey:ProgramID"`
-	StudentID uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
 }
 
 type StudentToCourse struct {
@@ -80,10 +81,45 @@ type Course struct {
 	Teacher     string // ADD IN TEACHER INFO
 }
 
+type returnStudent struct {
+	StudentID uint64 `json:"studentID"`
+	Email     string `json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Token     string `json:token`
+}
+
+//fundamental functions
 func encryptPassword(password string) string {
 	return password
 }
 
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
+
+func createUniqueKey(id uint64) string {
+	keyToTry := randStringRunes(30)
+	var studentToken SessionToken
+	db.Where(SessionToken{StudentID:0 Token:keyToTry}).First(&studentToken)
+	for studentToken.StudentID != 0 {
+		keyToTry := randStringRunes(30)
+		db.Where(SessionToken{StudentID:0 Token:keyToTry}).First(&studentToken)	
+	} 
+	
+	studentToken.StudentID = id
+	studentToken.Token = keyToTry
+	db.Create(&studentToken)
+	return studentToken.Token
+}
+
+//functions specific for requests
 func validateUser(email, password string) Student {
 	//encrypt password to compare whith the already encrypted password in the database
 	encryptedPassword := encryptPassword(password)
@@ -105,6 +141,8 @@ func findUserWithID(id int) Student {
 var db *gorm.DB
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	var err error
 	db, err = gorm.Open("sqlite3", "test.db")
 	if err != nil {
@@ -112,7 +150,6 @@ func main() {
 	}
 	db.AutoMigrate(&Student{})
 	db.AutoMigrate(&Admin{})
-	db.AutoMigrate(&StudentToProgram{})
 	db.AutoMigrate(&StudentProgram{})
 	db.AutoMigrate(&Program{})
 	db.AutoMigrate(&StudentToCourse{})
@@ -125,13 +162,26 @@ func main() {
 	{
 		user := api.Group("/user")
 		{
-			user.POST("/validateUser", func(c *gin.Context) {
+
+			user.POST("/login", func(c *gin.Context) {
 				//get the variables from the request
 				email := c.PostForm("email")
 				password := c.PostForm("password")
+				studentInformation := validateUser(email, password)
+				var studentReturn returnStudent
 
-				c.JSON(200, validateUser(email, password))
+				studentReturn.Email = studentInformation.Email
+				studentReturn.FirstName = studentInformation.FirstName
+				studentReturn.LastName = studentInformation.LastName
+				studentReturn.StudentID = studentInformation.StudentID
+				studentReturn.Token = createUniqueKey(studentInformation.StudentID)
 
+				c.JSON(200, studentReturn)
+			})
+
+			user.POST("/logout", func(c *gin.Context) {
+				token := c.PostForm("token")
+				db.Where(SessionToken{StudentID:0 Token:token}).Delete(&SessionToken{})
 			})
 
 			user.POST("/newUser", func(c *gin.Context) {
@@ -186,12 +236,12 @@ func main() {
 					return
 				}
 
-				var studentPrograms StudentToProgram
+				var studentPrograms StudentProgram
 				studentPrograms.StudentID = student.StudentID
 
 				studentPrograms.ProgramID = program.ProgramID
 
-				var testStudentPrograms StudentToProgram
+				var testStudentPrograms StudentProgram
 				db.Where("student_id = ? and program_id = ?", studentPrograms.StudentID, studentPrograms.ProgramID).First(&testStudentPrograms)
 				if testStudentPrograms.ProgramID != 0 {
 					c.JSON(200, gin.H{"errorMsg": "Student already enrolled in this program"})
@@ -231,7 +281,7 @@ func main() {
 					return
 				}
 
-				var studentToProgram StudentToProgram
+				var studentToProgram StudentProgram
 				db.Where("program_id = ? and  student_id = ?", program.ProgramID, student.StudentID).First(&studentToProgram)
 				if studentToProgram.StudentID == 0 {
 					c.JSON(200, gin.H{"errorMsg": "Student is not currently in this program"})

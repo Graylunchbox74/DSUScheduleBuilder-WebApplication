@@ -80,6 +80,7 @@ type Course struct {
 	CollegeName string
 	Location    string
 	Teacher     string // ADD IN TEACHER INFO
+	Semester	string
 }
 
 type returnStudent struct {
@@ -441,6 +442,36 @@ func main() {
 				}
 				courseID, _ := strconv.Atoi(c.PostForm("courseID"))
 				db.Where("student_id = ? and course_id = ?", student.StudentID, courseID).Delete(&StudentToCourse{})
+			})
+
+			user.POST("/searchForCourse", func(c * gin.Context){
+
+				token := c.PostForm("token")
+				var student Student
+				student, isExpired := findStudentGivenToken(token)
+				if isExpired {
+					c.JSON(401, gin.H{"errorMsg": "token expired"})
+				}
+				if student.StudentID == 0 {
+					c.JSON(401, gin.H{"errorMsg": "student not found"})
+					return
+				}
+
+				var course Course
+
+				course.collegeName := c.PostForm("collegeName")
+				courseCode := c.PostForm("courseCode")
+				course.CourseCode, _ = strconv.Atoi(courseCode)
+				course.TeacherName := c.PostForm("teacherName")
+				course.CourseName := c.PostForm("courseName")
+				course.Semester := c.PostForm("semester")
+				course.Location := c.PostForm("location")
+
+				var returnCourses []Course
+
+				db.Where(course).Find(&returnCourses)
+
+				c.JSON(200,returnCourses)
 			})
 		}
 		adm := api.Group("/admin")

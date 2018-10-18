@@ -21,8 +21,9 @@ type Admin struct {
 }
 
 type SessionToken struct {
-	StudentID uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
-	Token     string `gorm:"unique"`
+	StudentID   uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
+	Token       string `gorm:"unique"`
+	TimeUpdated time.Time
 }
 
 type Student struct {
@@ -105,16 +106,17 @@ func randStringRunes(n int) string {
 }
 
 func createUniqueKey(id uint64) string {
-	keyToTry := randStringRunes(30)
+	keyToTry := randStringRunes(50)
 	var studentToken SessionToken
 	db.Where(SessionToken{StudentID: 0, Token: keyToTry}).First(&studentToken)
 	for studentToken.StudentID != 0 {
-		keyToTry := randStringRunes(30)
+		keyToTry := randStringRunes(50)
 		db.Where(SessionToken{StudentID: 0, Token: keyToTry}).First(&studentToken)
 	}
 
 	studentToken.StudentID = id
 	studentToken.Token = keyToTry
+	studentToken.TimeUpdated = time.Now()
 	db.Create(&studentToken)
 	return studentToken.Token
 }
@@ -138,17 +140,23 @@ func findUserWithID(id int) Student {
 	return student
 }
 
-func findStudentGivenToken(token string) Student {
+func findStudentGivenToken(token string) Student, bool {
 	var student Student
 	var sessiontoken SessionToken
 	db.Where(SessionToken{StudentID: 0, Token: token}).First(&sessiontoken)
 
 	if sessiontoken.StudentID == 0 {
-		return student
+		return student, false
 	}
 
+	if sessiontoken.TimeUpdated < time.Now() {
+		return nil, true
+	}
+
+	SessionToken.TimeUpdated = time.Now()
+
 	db.Where(Student{StudentID: sessiontoken.StudentID}).First(&student)
-	return student
+	return student, false
 }
 
 var db *gorm.DB
@@ -196,6 +204,7 @@ func main() {
 			user.POST("/logout", func(c *gin.Context) {
 				token := c.PostForm("token")
 				db.Where(SessionToken{StudentID: 0, Token: token}).Delete(&SessionToken{})
+				c.JSON(200,gin.H{})
 			})
 
 			user.POST("/newUser", func(c *gin.Context) {
@@ -214,7 +223,7 @@ func main() {
 				err := db.Create(&student).Error
 				if err != nil {
 					fmt.Println(err.Error())
-					c.JSON(200, gin.H{"errorMsg": err})
+					c.JSON(400, gin.H{"errorMsg": err})
 				} else {
 					db.Update()
 					c.JSON(200, gin.H{"errorMsg": ""})
@@ -227,35 +236,36 @@ func main() {
 			user.POST("/deleteUser", func(c *gin.Context) {
 				token := c.PostForm("token")
 				var student Student
-				student = findStudentGivenToken(token)
+				student, isExpired := findStudentGivenToken(token)
+				if isExpired {
+					c.JSON(401, gin.H{"errorMsg": "token expired"})
+				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
 					return
 				}
-
 				db.Delete(&student)
 			})
 
 			user.POST("/addStudentProgram", func(c *gin.Context) {
 				token := c.PostForm("token")
 				var student Student
-				student = findStudentGivenToken(token)
+				student, isExpired := findStudentGivenToken(token)
+				if isExpired {
+					c.JSON(401, gin.H{"errorMsg": "token expired"})
+				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
 					return
 				}
 
-				if student.StudentID == 0 {
-					c.JSON(200, gin.H{"errorMsg": "student not found"})
-					return
-				}
 
 				programIDString := c.PostForm("programID")
 				var program Program
 				db.Where("program_id = ?", programIDString).First(&program)
 
 				if program.ProgramID == 0 {
-					c.JSON(200, gin.H{"errorMsg": "program not found"})
+					c.JSON(400, gin.H{"errorMsg": "program not found"})
 					return
 				}
 
@@ -267,7 +277,7 @@ func main() {
 				var testStudentPrograms StudentProgram
 				db.Where("student_id = ? and program_id = ?", studentPrograms.StudentID, studentPrograms.ProgramID).First(&testStudentPrograms)
 				if testStudentPrograms.ProgramID != 0 {
-					c.JSON(200, gin.H{"errorMsg": "Student already enrolled in this program"})
+					c.JSON(400, gin.H{"errorMsg": "Student already enrolled in this program"})
 					return
 				}
 
@@ -288,7 +298,10 @@ func main() {
 			user.POST("/removeStudentProgram", func(c *gin.Context) {
 				token := c.PostForm("token")
 				var student Student
-				student = findStudentGivenToken(token)
+				student, isExpired := findStudentGivenToken(token)
+				if isExpired {
+					c.JSON(401, gin.H{"errorMsg": "token expired"})
+				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
 					return
@@ -306,7 +319,7 @@ func main() {
 				var studentToProgram StudentProgram
 				db.Where("program_id = ? and  student_id = ?", program.ProgramID, student.StudentID).First(&studentToProgram)
 				if studentToProgram.StudentID == 0 {
-					c.JSON(200, gin.H{"errorMsg": "Student is not currently in this program"})
+					c.JSON(400, gin.H{"errorMsg": "Student is not currently in this program"})
 					return
 				}
 				db.Delete(&studentToProgram)
@@ -323,7 +336,10 @@ func main() {
 
 				token := c.Params.ByName("token")
 				var student Student
-				student = findStudentGivenToken(token)
+				student, isExpired := findStudentGivenToken(token)
+				if isExpired {
+					c.JSON(401, gin.H{"errorMsg": "token expired"})
+				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
 					return
@@ -350,7 +366,10 @@ func main() {
 			user.POST("/enrollInCourse", func(c *gin.Context) {
 				token := c.PostForm("token")
 				var student Student
-				student = findStudentGivenToken(token)
+				student, isExpired := findStudentGivenToken(token)
+				if isExpired {
+					c.JSON(401, gin.H{"errorMsg": "token expired"})
+				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
 					return
@@ -361,7 +380,7 @@ func main() {
 				var studentToCourse StudentToCourse
 				db.Where("student_id = ? and course_id = ?", student.StudentID, courseID).First(&studentToCourse)
 				if studentToCourse.CourseID != 0 {
-					c.JSON(200, gin.H{"errorMsg": "Student already enrolled in this course"})
+					c.JSON(400, gin.H{"errorMsg": "Student already enrolled in this course"})
 					return
 				}
 
@@ -369,7 +388,7 @@ func main() {
 				var course Course
 				db.Where("course_id = ?", courseID).First(&course)
 				if course.CourseID == 0 {
-					c.JSON(200, gin.H{"errorMsg": "Course does not exist with this id"})
+					c.JSON(400, gin.H{"errorMsg": "Course does not exist with this id"})
 					return
 				}
 				//now we need to make sure that the class does not conflict with other classes
@@ -391,7 +410,7 @@ func main() {
 						daysForCurrentCourse := strconv.Itoa(int(courseToCompare.DaysOfWeek))
 						for i := 0; i < 5; i++ {
 							if daysForCurrentCourse[i] == daysForRegisteringCourse[i] && daysForCurrentCourse[i] == '1' {
-								c.JSON(200, gin.H{"errorMsg": "Course conflicts with " + courseToCompare.CourseName})
+								c.JSON(400, gin.H{"errorMsg": "Course conflicts with " + courseToCompare.CourseName})
 								return
 							}
 						}
@@ -412,7 +431,10 @@ func main() {
 			user.POST("/dropCourse", func(c *gin.Context) {
 				token := c.PostForm("token")
 				var student Student
-				student = findStudentGivenToken(token)
+				student, isExpired := findStudentGivenToken(token)
+				if isExpired {
+					c.JSON(401, gin.H{"errorMsg": "token expired"})
+				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
 					return
@@ -434,7 +456,7 @@ func main() {
 				db.Where("Major = ? and Program = ? and Catalog_Year = ?", program.Major, program.Program, program.CatalogYear).First(&testIfExists)
 
 				if testIfExists.ProgramID != 0 {
-					c.JSON(200, gin.H{"errorMsg": "Program Already Exists"})
+					c.JSON(400, gin.H{"errorMsg": "Program Already Exists"})
 					return
 				}
 
@@ -450,7 +472,7 @@ func main() {
 				program.ProgramID = uint64(tmpID)
 				db.Where("program_id = ?", program.ProgramID).First(&program)
 				if program.ProgramID == 0 {
-					c.JSON(200, gin.H{"errorMsg": "Program not found"})
+					c.JSON(400, gin.H{"errorMsg": "Program not found"})
 					return
 				}
 				db.Delete(&program)

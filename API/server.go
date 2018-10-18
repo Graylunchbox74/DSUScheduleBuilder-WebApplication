@@ -107,12 +107,12 @@ func randStringRunes(n int) string {
 func createUniqueKey(id uint64) string {
 	keyToTry := randStringRunes(30)
 	var studentToken SessionToken
-	db.Where(SessionToken{StudentID:0 Token:keyToTry}).First(&studentToken)
+	db.Where(SessionToken{StudentID: 0, Token: keyToTry}).First(&studentToken)
 	for studentToken.StudentID != 0 {
 		keyToTry := randStringRunes(30)
-		db.Where(SessionToken{StudentID:0 Token:keyToTry}).First(&studentToken)	
-	} 
-	
+		db.Where(SessionToken{StudentID: 0, Token: keyToTry}).First(&studentToken)
+	}
+
 	studentToken.StudentID = id
 	studentToken.Token = keyToTry
 	db.Create(&studentToken)
@@ -181,7 +181,7 @@ func main() {
 
 			user.POST("/logout", func(c *gin.Context) {
 				token := c.PostForm("token")
-				db.Where(SessionToken{StudentID:0 Token:token}).Delete(&SessionToken{})
+				db.Where(SessionToken{StudentID: 0, Token: token}).Delete(&SessionToken{})
 			})
 
 			user.POST("/newUser", func(c *gin.Context) {

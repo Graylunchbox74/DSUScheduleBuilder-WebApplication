@@ -1,4 +1,3 @@
-from server import app
 from server import controllers
 from server.models.forms.registration_form import RegistrationForm
 from server.models.utils import facade_result_codes

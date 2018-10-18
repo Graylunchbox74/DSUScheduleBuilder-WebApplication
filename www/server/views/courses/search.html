@@ -1,0 +1,46 @@
+{% extends 'partials/_layout.html' %}
+
+{% block content %}
+<h1>Search for courses</h1>
+
+<form>
+    <div class="form-row">
+        <div class="col-md-3">
+            <label for="collegeName">College Name</label>
+            <input type="text" class="form-control" id="collegeName" placeholder="College (i.e. CSC)">
+        </div>
+        <div class="col-md-3">
+            <label for="courseNumber">College Name</label>
+            <input type="text" class="form-control" id="courseNumber" placeholder="Course number (i.e. 300)">
+        </div>
+        <div class="col-md-6">
+            <label for="teacherName">College Name</label>
+            <input type="text" class="form-control" id="teacherName" placeholder="Teacher">
+        </div>
+    </div>
+    <div class="form-row mt-2">
+        <div class="col-md-2">
+            <label for="location">Location</label>
+            <select class="form-control" id="location">
+                <option selected>On campus</option>
+                <option>Online</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="semester">Semester</label>
+            <select class="form-control" id="semester">
+                <option selected>Fall 2018</option>
+                <option>Spring 2019</option>
+                <option>Summer 2019</option>
+            </select>
+        </div>
+        <div class="col-md-8">
+            <label for="courseName">Course Name</label>
+            <input type="text" class="form-control" id="courseName" placeholder="Course name">
+        </div>
+    </div>
+    <div class=" mt-2 w-100 clearfix">
+        <button type="button" class="btn btn-primary float-md-right">Search</button>
+    </div>
+</form>
+{% endblock %}

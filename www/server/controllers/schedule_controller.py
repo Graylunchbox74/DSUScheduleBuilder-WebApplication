@@ -1,4 +1,3 @@
-from server import app
 from server import controllers
 import flask
 

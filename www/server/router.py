@@ -4,6 +4,7 @@ from server.controllers.home_controller import HomeController
 from server.controllers.login_controller import LoginController, LogoutController
 from server.controllers.register_controller import RegisterController
 from server.controllers.schedule_controller import ScheduleController
+from server.controllers.course.search_controller import CourseSearchController
 
 # Home page
 home_view = HomeController.as_view('index')
@@ -19,3 +20,6 @@ app.add_url_rule('/register', view_func=RegisterController.as_view('register'))
 
 # Schedule page
 app.add_url_rule('/schedule', view_func=ScheduleController.as_view('schedule'))
+
+# Course search page
+app.add_url_rule('/courses/search', view_func=CourseSearchController.as_view('courses_search'))

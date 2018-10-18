@@ -27,8 +27,8 @@ class RegisterController(controllers.BaseController):
             (code, _) = user_facade.register_user(
                 email=register_form.email.data,
                 password=register_form.password.data,
-                firstName=register_form.first_name.data,
-                lastName=register_form.last_name.data,
+                first_name=register_form.first_name.data,
+                last_name=register_form.last_name.data,
             )
 
             if code == facade_result_codes.SUCCESS:

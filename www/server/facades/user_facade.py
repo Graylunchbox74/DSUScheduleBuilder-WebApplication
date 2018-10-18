@@ -28,27 +28,28 @@ def validate_user(email, password):
     }
 
     try:
-        response = requests.post(f"{app.config['API_ENDPOINT']}/user/validateUser", data=data)
+        response = requests.post(f"{app.config['API_ENDPOINT']}/user/login", data=data)
         json_response = response.json()
 
         # Assume not authenticated until proved otherwise
         result_code = FRC.NOT_AUTHENTICATED
 
-        if response.status_code == 200 and json_response['StudentID'] != 0:
+        if response.status_code == 200 and json_response['studentID'] != 0:
             result_code = FRC.SUCCESS
 
-        user = {}
+        user = None
         if result_code == FRC.SUCCESS:
             user = UserModel.create(
-                id=json_response['StudentID'],
-                email=json_response['Email'],
+                id=json_response['studentID'],
+                email=json_response['email'],
                 first_name=json_response['firstName'],
-                last_name=json_response['lastName']
+                last_name=json_response['lastName'],
+                token=json_response['token'],
             )
 
         return (result_code, user)
     except:
-        return (FRC.CONNECTION_ERROR, {})
+        return (FRC.CONNECTION_ERROR, None)
 
 
 def register_user(**kwargs):
@@ -74,7 +75,12 @@ def register_user(**kwargs):
         (int, json)
         Tuple of facade result code and the json response.
     """
-    data = kwargs
+    data = {
+        "email": kwargs['email'],
+        "password": kwargs['password'],
+        "firstName": kwargs['first_name'],
+        "lastName": kwargs['last_name'],
+    }
 
     try:
         response = requests.post(f"{app.config['API_ENDPOINT']}/user/newUser", data=data)

@@ -80,7 +80,7 @@ type Course struct {
 	CollegeName string
 	Location    string
 	Teacher     string // ADD IN TEACHER INFO
-	Semester	string
+	Semester    string
 }
 
 type returnStudent struct {
@@ -141,7 +141,7 @@ func findUserWithID(id int) Student {
 	return student
 }
 
-func findStudentGivenToken(token string) Student, bool {
+func findStudentGivenToken(token string) (Student, bool) {
 	var student Student
 	var sessiontoken SessionToken
 	db.Where(SessionToken{StudentID: 0, Token: token}).First(&sessiontoken)
@@ -150,11 +150,14 @@ func findStudentGivenToken(token string) Student, bool {
 		return student, false
 	}
 
-	if sessiontoken.TimeUpdated < time.Now() {
-		return nil, true
+	/* I am trying to test if the date on the token + some time that we want
+	the token to expire, how do i do the less than operator on time?
+	*/
+	if !time.Now().Before(sessiontoken.TimeUpdated.Add(time.Hour * 24)) {
+		return student, true
 	}
 
-	SessionToken.TimeUpdated = time.Now()
+	sessiontoken.TimeUpdated = time.Now()
 
 	db.Where(Student{StudentID: sessiontoken.StudentID}).First(&student)
 	return student, false
@@ -205,7 +208,7 @@ func main() {
 			user.POST("/logout", func(c *gin.Context) {
 				token := c.PostForm("token")
 				db.Where(SessionToken{StudentID: 0, Token: token}).Delete(&SessionToken{})
-				c.JSON(200,gin.H{})
+				c.JSON(200, gin.H{})
 			})
 
 			user.POST("/newUser", func(c *gin.Context) {
@@ -240,6 +243,7 @@ func main() {
 				student, isExpired := findStudentGivenToken(token)
 				if isExpired {
 					c.JSON(401, gin.H{"errorMsg": "token expired"})
+					return
 				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
@@ -254,12 +258,12 @@ func main() {
 				student, isExpired := findStudentGivenToken(token)
 				if isExpired {
 					c.JSON(401, gin.H{"errorMsg": "token expired"})
+					return
 				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
 					return
 				}
-
 
 				programIDString := c.PostForm("programID")
 				var program Program
@@ -302,6 +306,7 @@ func main() {
 				student, isExpired := findStudentGivenToken(token)
 				if isExpired {
 					c.JSON(401, gin.H{"errorMsg": "token expired"})
+					return
 				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
@@ -340,6 +345,7 @@ func main() {
 				student, isExpired := findStudentGivenToken(token)
 				if isExpired {
 					c.JSON(401, gin.H{"errorMsg": "token expired"})
+					return
 				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
@@ -370,6 +376,7 @@ func main() {
 				student, isExpired := findStudentGivenToken(token)
 				if isExpired {
 					c.JSON(401, gin.H{"errorMsg": "token expired"})
+					return
 				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
@@ -435,6 +442,7 @@ func main() {
 				student, isExpired := findStudentGivenToken(token)
 				if isExpired {
 					c.JSON(401, gin.H{"errorMsg": "token expired"})
+					return
 				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
@@ -444,13 +452,14 @@ func main() {
 				db.Where("student_id = ? and course_id = ?", student.StudentID, courseID).Delete(&StudentToCourse{})
 			})
 
-			user.POST("/searchForCourse", func(c * gin.Context){
+			user.POST("/searchForCourse", func(c *gin.Context) {
 
 				token := c.PostForm("token")
 				var student Student
 				student, isExpired := findStudentGivenToken(token)
 				if isExpired {
 					c.JSON(401, gin.H{"errorMsg": "token expired"})
+					return
 				}
 				if student.StudentID == 0 {
 					c.JSON(401, gin.H{"errorMsg": "student not found"})
@@ -459,19 +468,20 @@ func main() {
 
 				var course Course
 
-				course.collegeName := c.PostForm("collegeName")
+				course.CollegeName = c.PostForm("collegeName")
 				courseCode := c.PostForm("courseCode")
-				course.CourseCode, _ = strconv.Atoi(courseCode)
-				course.TeacherName := c.PostForm("teacherName")
-				course.CourseName := c.PostForm("courseName")
-				course.Semester := c.PostForm("semester")
-				course.Location := c.PostForm("location")
+				CourseCodeint, _ := strconv.Atoi(courseCode)
+				course.CourseCode = uint64(CourseCodeint)
+				course.Teacher = c.PostForm("teacherName")
+				course.CourseName = c.PostForm("courseName")
+				course.Semester = c.PostForm("semester")
+				course.Location = c.PostForm("location")
 
 				var returnCourses []Course
 
 				db.Where(course).Find(&returnCourses)
 
-				c.JSON(200,returnCourses)
+				c.JSON(200, returnCourses)
 			})
 		}
 		adm := api.Group("/admin")

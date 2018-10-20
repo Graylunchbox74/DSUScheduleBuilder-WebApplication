@@ -150,10 +150,11 @@ func findStudentGivenToken(token string) (Student, bool) {
 		return student, false
 	}
 
-	/* I am trying to test if the date on the token + some time that we want
-	the token to expire, how do i do the less than operator on time?
-	*/
-	if !time.Now().Before(sessiontoken.TimeUpdated.Add(time.Hour * 24)) {
+	println(sessiontoken.TimeUpdated.String())
+	println(time.Now().Add(time.Minute).String())
+
+	//session expires after a day
+	if time.Now().After(sessiontoken.TimeUpdated.AddDate(0, 0, 1)) {
 		return student, true
 	}
 

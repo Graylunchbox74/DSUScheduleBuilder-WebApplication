@@ -40,6 +40,21 @@ class CourseModel(BaseModel):
             "teacher": self.teacher,
         }
 
+    def convert_dow(self, dow_int):
+        s = ""
+        if dow_int % 10 == 1:
+            s += "Mon, "
+        if int(dow_int / 10) % 10 == 1:
+            s += "Tues, "
+        if int(dow_int / 100) % 10 == 1:
+            s += "Wed, "
+        if int(dow_int / 1000) % 10 == 1:
+            s += "Thur, "
+        if int(dow_int / 10000) % 10 == 1:
+            s += "Fri, "
+
+        return s[:-2]
+
     def from_json(self, data):
         try:
             self.course_id = int(data['course_id'])
@@ -47,13 +62,13 @@ class CourseModel(BaseModel):
             self.course_name = str(data['course_name'])
             self.credits = int(data['credits'])
 
-            self.days_of_week = int(data['days_of_week'])
+            self.days_of_week = self.convert_dow(int(data['days_of_week']))
             self.start_time = int(data['start_time'])
             self.end_time = int(data['end_time'])
 
             # These should be UTC, not str
             self.start_date = str(data['start_date'])
-            self.end_date = int(data['end_date'])
+            self.end_date = str(data['end_date'])
 
             self.college_name = str(data['college_name'])
             self.location = str(data['location'])

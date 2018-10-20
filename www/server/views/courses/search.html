@@ -1,6 +1,8 @@
 {% extends 'partials/_layout.html' %}
 
 {% block scripts %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/facades/course_facade.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/managers/request_manager.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/search.js') }}"></script>
 {% endblock %}
 

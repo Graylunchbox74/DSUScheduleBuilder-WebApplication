@@ -1,5 +1,9 @@
 {% extends 'partials/_layout.html' %}
 
+{% block scripts %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/search.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 <h1>Search for courses</h1>
 
@@ -10,11 +14,11 @@
             <input type="text" class="form-control" id="collegeName" placeholder="College (i.e. CSC)">
         </div>
         <div class="col-md-3">
-            <label for="courseNumber">College Name</label>
+            <label for="courseNumber">Course Number</label>
             <input type="text" class="form-control" id="courseNumber" placeholder="Course number (i.e. 300)">
         </div>
         <div class="col-md-6">
-            <label for="teacherName">College Name</label>
+            <label for="teacherName">Teacher's Name</label>
             <input type="text" class="form-control" id="teacherName" placeholder="Teacher">
         </div>
     </div>
@@ -39,8 +43,14 @@
             <input type="text" class="form-control" id="courseName" placeholder="Course name">
         </div>
     </div>
-    <div class=" mt-2 w-100 clearfix">
-        <button type="button" class="btn btn-primary float-md-right">Search</button>
+    <div class="mt-2 w-100 clearfix">
+        <button type="button" id="searchButton" class="btn btn-primary float-md-right">Search</button>
     </div>
 </form>
+
+<h3>Search Results</h3>
+
+<div id="search-container" class="container secondary-background">
+    <div class="p-4 text-center text-muted">Search above</div>
+</div>
 {% endblock %}

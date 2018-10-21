@@ -306,7 +306,7 @@ func enrollInCourse(c *gin.Context) {
 			daysForCurrentCourse := strconv.Itoa(int(courseToCompare.DaysOfWeek))
 			for i := 0; i < 5; i++ {
 				if daysForCurrentCourse[i] == daysForRegisteringCourse[i] && daysForCurrentCourse[i] == '1' {
-					c.JSON(400, gin.H{"errorMsg": "Course conflicts with " + courseToCompare.CourseName})
+					c.JSON(400, gin.H{"conflicts": true})
 					return
 				}
 			}
@@ -370,4 +370,18 @@ func searchForCourse(c *gin.Context) {
 	db.Where(course).Find(&returnCourses)
 
 	c.JSON(200, returnCourses)
+}
+
+func getProgramRequirements(c *gin.Context) {
+	token := c.PostForm("token")
+	var student Student
+	student, isExpired := findStudentGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if student.StudentID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "student not found"})
+		return
+	}
 }

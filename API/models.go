@@ -80,3 +80,10 @@ type returnStudent struct {
 	LastName  string `json:"lastName"`
 	Token     string `json:"token"`
 }
+
+type PreviouslyEnrolled struct {
+	StudentID   uint64 `json:"studentID"`
+	Credits     uint64 `json:"credits"`
+	CollegeName string `json:"collegeName"`
+	CourseCode  uint64 `json:"courseCode"`
+}

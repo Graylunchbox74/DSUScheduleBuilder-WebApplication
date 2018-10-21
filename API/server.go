@@ -38,16 +38,25 @@ func main() {
 	{
 		user := api.Group("/user")
 		{
+			//basic user functions
 			user.POST("/login", login)
 			user.POST("/logout", logout)
 			user.POST("/newUser", newUser)
 			user.POST("/deleteUser", deleteUser)
-			user.POST("/addStudentProgram", addProgramUser)
-			user.POST("/removeStudentProgram", removeProgram)
+
+			//current course functions
 			user.POST("/enrollInCourse", enrollInCourse)
 			user.POST("/dropCourse", dropCourse)
 			user.POST("/searchForCourse", searchForCourse)
 			user.GET("/getEnrolledCourses", getEnrolledCourses)
+
+			//previous course functions
+			user.POST("/addPreviousCourse")
+
+			user.POST("/addStudentProgram", addProgramUser)
+			user.POST("/removeStudentProgram", removeProgram)
+			user.GET("/getProgramRequirements")
+			user.GET("/searchForProgram")
 		}
 		adm := api.Group("/admin")
 		{

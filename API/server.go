@@ -16,7 +16,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 
 	var err error
-	db, err = gorm.Open("sqlite3", "test.db")
+	db, err = gorm.Open("sqlite3", "db/test.db")
 	if err != nil {
 		panic("Failed to connect to the database")
 	}

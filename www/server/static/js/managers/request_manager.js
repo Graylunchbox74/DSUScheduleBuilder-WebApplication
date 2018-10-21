@@ -12,7 +12,7 @@ modulejs.define('request_manager', function () {
             return new Promise((res, rej) => {
                 fProm.then(data => {
                     // Check to see if we're being redirected to log in page
-                    if (data.redirected == true) {
+                    if (data.redirected == true && data.url.endsWith("/login")) {
                         window.location.pathname = "/logout"
                         rej("REDIRECT")
                         return

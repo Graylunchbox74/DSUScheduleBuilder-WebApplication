@@ -365,7 +365,7 @@ func searchForCourse(c *gin.Context) {
 	course.Semester = c.PostForm("semester")
 	course.Location = c.PostForm("location")
 
-	var returnCourses []Course
+	returnCourses := []Course{}
 
 	db.Where(course).Find(&returnCourses)
 

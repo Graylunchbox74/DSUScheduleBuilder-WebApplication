@@ -46,7 +46,7 @@ func main() {
 			user.POST("/removeStudentProgram", removeProgram)
 			user.POST("/enrollInCourse", enrollInCourse)
 			user.POST("/dropCourse", dropCourse)
-			user.POST("/searchForCourse")
+			user.POST("/searchForCourse", searchForCourse)
 			user.GET("/getEnrolledCourses", getEnrolledCourses)
 		}
 		adm := api.Group("/admin")

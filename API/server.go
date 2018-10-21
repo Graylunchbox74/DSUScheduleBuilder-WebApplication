@@ -554,6 +554,8 @@ func main() {
 				course.Semester = c.PostForm("semester")
 
 				db.Create(&course)
+
+				c.JSON(200, gin.H{})
 			})
 		}
 	}

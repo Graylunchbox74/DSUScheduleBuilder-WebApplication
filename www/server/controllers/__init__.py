@@ -15,7 +15,7 @@ class BaseController(MethodView):
         Be sure to RETURN this function call.
         """
 
-        flask.flash(f"Your session has expired. Please log in again.")
+        flask.flash(f"Your session has expired. Please log in again.", "danger")
 
         # Log them out, which will require them to log back in
         return flask.redirect(flask.url_for('logout'))

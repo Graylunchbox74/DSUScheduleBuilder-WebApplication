@@ -47,6 +47,6 @@ class LogoutController(controllers.BaseController):
     def get(self):
         if flask.session.get('user') is not None:
             del flask.session['user']
-            flask.flash("Successfully logged out.", "success")
+            flask.flash("You were logged out.", "info")
 
         return flask.redirect(flask.url_for('index'))

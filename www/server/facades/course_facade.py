@@ -61,11 +61,11 @@ def get_enrolled_courses(token):
     """
 
     try:
-        response = requests.get(f"{app.config['API_ENDPOINT']}/user/getEnrolledCourses/{token}")
+        response = requests.get(f"{app.config['API_ENDPOINT']}/user/getEnrolledCourses?token={token}")
         json_response = response.json()
 
         if response.status_code == 401:
-            return (FRC.NOT_AUTHORIZED, [])
+            return (FRC.NOT_AUTHENTICATED, [])
         elif response.status_code == 400:
             return (FRC.SERVER_ERROR, [])
 
@@ -75,7 +75,7 @@ def get_enrolled_courses(token):
             c = CourseModel.create(
                 course_id=course['CourseID'],
                 course_code=course['CourseCode'],
-                course_name=course['CouseName'],
+                course_name=course['CourseName'],
                 credits=course['Credits'],
                 days_of_week=course['DaysOfWeek'],
                 start_time=course['StartTime'],

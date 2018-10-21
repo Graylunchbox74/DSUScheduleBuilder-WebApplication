@@ -337,11 +337,12 @@ func main() {
 				c.JSON(200, gin.H{"errorMsg": ""})
 			})
 
-			user.GET("/getEnrolledCourses/:studentID", func(c *gin.Context) {
-				var courses []Course
+			user.GET("/getEnrolledCourses", func(c *gin.Context) {
+				courses := []Course{}
 				var studentToCourses []StudentToCourse
 
-				token := c.Params.ByName("token")
+				token := c.Request.URL.Query()["token"][0]
+
 				var student Student
 				student, isExpired := findStudentGivenToken(token)
 				if isExpired {
@@ -353,9 +354,6 @@ func main() {
 					return
 				}
 				db.Where("student_id = ?", student.StudentID).Find(&studentToCourses)
-				if len(studentToCourses) == 0 {
-					c.JSON(200, courses)
-				}
 
 				var singleCourse Course
 				for _, current := range studentToCourses {

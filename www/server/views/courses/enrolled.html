@@ -1,0 +1,16 @@
+{% extends 'partials/_layout.html' %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/managers/request_manager.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/facades/course_facade.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/enrolled.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<h1>Enrolled Courses</h1>
+{% for course in courses %}
+<div class="row container">
+    {{ course.course_name }}
+</div>
+{% endfor %}
+{% endblock %}

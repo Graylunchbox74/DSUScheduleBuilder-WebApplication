@@ -1,3 +1,7 @@
+:root {
+    --primary-background: #222;
+    --secondary-background: #333;
+}
 
 * {
     padding: 0;
@@ -6,7 +10,7 @@
 }
 
 body {
-    background: #222;
+    background: var(--primary-background);
     color: #eee;
 }
 
@@ -16,4 +20,8 @@ main {
 
 .content-section {
     padding: .25rem;
+}
+
+.secondary-background {
+    background: var(--secondary-background);
 }

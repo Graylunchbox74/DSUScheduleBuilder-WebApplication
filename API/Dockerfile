@@ -13,4 +13,6 @@ RUN go install -v ./
 
 EXPOSE 8080
 
-CMD ["go", "run", "server.go"]
+RUN go build server.go adminFunctions.go userFunctions.go models.go
+
+CMD ["./server"]

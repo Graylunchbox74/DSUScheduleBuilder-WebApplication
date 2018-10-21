@@ -545,7 +545,7 @@ func main() {
 
 				course.Location = c.PostForm("location")
 
-				tmpString = c.PostForm("credits")
+				tmpString = c.PostForm("startTime")
 				tmp, _ = strconv.Atoi(tmpString)
 				course.StartTime = uint64(tmp)
 

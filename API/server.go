@@ -51,12 +51,16 @@ func main() {
 			user.GET("/getEnrolledCourses", getEnrolledCourses)
 
 			//previous course functions
-			user.POST("/addPreviousCourse")
+			user.POST("/addPreviousCourse", addPreviousProgram)
+			user.POST("/removePreviousCourse", removePreviousProgram)
 
+			//programs/majors/minors
 			user.POST("/addStudentProgram", addProgramUser)
 			user.POST("/removeStudentProgram", removeProgram)
+			user.GET("/getUsersPrograms")
 			user.GET("/getProgramRequirements")
 			user.GET("/searchForProgram")
+			user.GET("/getRemainingProgramRequirements")
 		}
 		adm := api.Group("/admin")
 		{

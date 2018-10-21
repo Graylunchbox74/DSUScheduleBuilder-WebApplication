@@ -87,7 +87,7 @@ func login(c *gin.Context) {
 	email := c.PostForm("email")
 	password := c.PostForm("password")
 	studentInformation := validateUser(email, password)
-	var studentReturn returnStudent
+	studentReturn := returnStudent{}
 
 	studentReturn.Email = studentInformation.Email
 	studentReturn.FirstName = studentInformation.FirstName
@@ -140,6 +140,7 @@ func deleteUser(c *gin.Context) {
 		return
 	}
 	db.Delete(&student)
+	c.JSON(200, gin.H{})
 }
 
 func addProgramUser(c *gin.Context) {
@@ -372,6 +373,66 @@ func searchForCourse(c *gin.Context) {
 	c.JSON(200, returnCourses)
 }
 
+func addPreviousProgram(c *gin.Context) {
+	token := c.PostForm("token")
+	var student Student
+	student, isExpired := findStudentGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if student.StudentID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "student not found"})
+		return
+	}
+
+	collegeName := c.Request.URL.Query()["collegeName"][0]
+	courseCodeString := c.Request.URL.Query()["courseCode"][0]
+	creditsString := c.Request.URL.Query()["credits"][0]
+
+	if collegeName == "" || courseCodeString == "" {
+		c.JSON(400, gin.H{"errorMsg": "Not enough information provided"})
+	}
+
+	tmp, _ := strconv.Atoi(courseCodeString)
+	tmpcredits, _ := strconv.Atoi(creditsString)
+	prevCourse := PreviouslyEnrolled{}
+
+	prevCourse.CollegeName = collegeName
+	prevCourse.CourseCode = uint64(tmp)
+	prevCourse.Credits = uint64(tmpcredits)
+	prevCourse.StudentID = student.StudentID
+
+	db.Create(&prevCourse)
+	c.JSON(200, gin.H{})
+}
+
+func removePreviousProgram(c *gin.Context) {
+	token := c.PostForm("token")
+	var student Student
+	student, isExpired := findStudentGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if student.StudentID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "student not found"})
+		return
+	}
+
+	prevCourse := PreviouslyEnrolled{}
+
+	prevCourse.StudentID = student.StudentID
+	prevCourse.CollegeName = c.Request.URL.Query()["collegeName"][0]
+	courseCodeString := c.Request.URL.Query()["courseCode"][0]
+	tmp, _ := strconv.Atoi(courseCodeString)
+	prevCourse.CourseCode = uint64(tmp)
+
+	db.Where(prevCourse).Delete(&PreviouslyEnrolled{})
+
+	c.JSON(200, gin.H{})
+}
+
 func getProgramRequirements(c *gin.Context) {
 	token := c.PostForm("token")
 	var student Student
@@ -384,4 +445,5 @@ func getProgramRequirements(c *gin.Context) {
 		c.JSON(401, gin.H{"errorMsg": "student not found"})
 		return
 	}
+
 }

@@ -48,10 +48,19 @@ $(function () {
                     <div class="card card-body card-dark">
                         <h3>Description:</h3>
                         <p>${course.description}</p>
+                        <div class="text-right">
+                            <button class="btn btn-primary" onclick="enrollInCourse(${course.course_id})">Enroll</button>
+                        </div>
                     </div>
                 </div>
             </div>
         `
+    }
+
+    window.enrollInCourse = function(course_id) {
+        course_facade.enrollInCourse(course_id).then(_ => {
+            window.location.reload()
+        })
     }
 
     let $searchContainer = $("#search-container")

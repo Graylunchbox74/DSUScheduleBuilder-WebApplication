@@ -19,7 +19,7 @@ def enroll_in_course(token, course_id):
 
     Returns
     -------
-        int
+        (int, bool)
         Success code from facade_result_codes
     """
 
@@ -32,16 +32,19 @@ def enroll_in_course(token, course_id):
         response = requests.post(f"{app.config['API_ENDPOINT']}/user/enrollInCourse", data=data)
         json_response = response.json()
 
+        if json_response.get('conflicts') is True:
+            return (FRC.SERVER_ERROR, True)
+
         if response.status_code == 401:
-            return FRC.NOT_AUTHENTICATED
+            return (FRC.NOT_AUTHENTICATED, False)
 
         if response.status_code == 400:
-            return FRC.SERVER_ERROR
+            return (FRC.SERVER_ERROR, False)
 
-        return FRC.SUCCESS
+        return (FRC.SUCCESS, False)
 
     except:
-        return FRC.CONNECTION_ERROR
+        return (FRC.CONNECTION_ERROR, False)
 
 
 def get_enrolled_courses(token):
@@ -136,7 +139,7 @@ def search_for_courses(token, kwargs):
         json_response = response.json()
 
         if response.status_code == 401:
-            return (FRC.NOT_AUTHORIZED, [])
+            return (FRC.NOT_AUTHENTICATED, [])
         elif response.status_code == 400:
             return (FRC.SERVER_ERROR, [])
 

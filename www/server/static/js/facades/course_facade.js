@@ -22,7 +22,15 @@ modulejs.define('course_facade', ['request_manager'], function (request) {
             .post_json("/courses/search", search_params)
     }
 
+    function enrollInCourse(course_id) {
+        console.log("%c Enrolling in course: " + course_id, "color: green; font-weight: 800")
+
+        return request
+            .post_json("/courses/enroll", { course_id: course_id })
+    }
+
     return {
         searchCourses: searchCourses,
+        enrollInCourse: enrollInCourse,
     }
 })

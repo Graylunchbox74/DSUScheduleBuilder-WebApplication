@@ -4,9 +4,9 @@ from server.models.utils import facade_result_codes as FRC
 import requests
 
 
-def validate_user(email, password):
+def login_user(email, password):
     """
-    Validates a user's credentials.
+    Logs a user in using their credentials.
 
     Parameters
     ----------
@@ -50,6 +50,56 @@ def validate_user(email, password):
         return (result_code, user)
     except:
         return (FRC.CONNECTION_ERROR, None)
+
+
+def check_user_token(token):
+    """
+
+    Checks a the user token to see if it is still active.
+
+    Parameters
+    ----------
+        token : str
+            The user token
+
+    Returns
+    -------
+        bool
+           Whether or not its valid
+    """
+
+    try:
+        response = requests.get(f"{app.config['API_ENDPOINT']}/user/checkToken?token={token}")
+
+        return response.status_code == 200
+
+    except:
+        return False
+
+
+def logout_user(token):
+    """
+
+    Logs a user out.
+
+    Parameters
+    ----------
+        token : str
+            The user token
+
+    Returns
+    -------
+        None
+    """
+
+    data = {
+        "token": token
+    }
+
+    try:
+        response = requests.post(f"{app.config['API_ENDPOINT']}/user/logout", data=data)
+    except:
+        return
 
 
 def register_user(**kwargs):

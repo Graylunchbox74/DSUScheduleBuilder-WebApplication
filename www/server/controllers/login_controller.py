@@ -1,6 +1,7 @@
 from server import controllers
 from server.models.forms.login_form import LoginForm
 from server.models.utils import facade_result_codes
+from server.models.user_model import UserModel
 from server.facades import user_facade
 
 import flask
@@ -23,7 +24,7 @@ class LoginController(controllers.BaseController):
         if login_form.validate_on_submit():
 
             # Validate User from DB
-            (code, user) = user_facade.validate_user(login_form.email.data, login_form.password.data)
+            (code, user) = user_facade.login_user(login_form.email.data, login_form.password.data)
 
             if code == facade_result_codes.SUCCESS:
                 flask.session['user'] = user.to_json()
@@ -46,7 +47,11 @@ class LogoutController(controllers.BaseController):
 
     def get(self):
         if flask.session.get('user') is not None:
+            user = UserModel.create(**flask.session['user'])
+
+            user_facade.logout_user(user.token)
+
             del flask.session['user']
             flask.flash("You were logged out.", "info")
 
-        return flask.redirect(flask.url_for('index'))
+        return flask.redirect(flask.url_for('login'))

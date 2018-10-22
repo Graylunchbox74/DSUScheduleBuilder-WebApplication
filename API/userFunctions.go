@@ -104,6 +104,23 @@ func logout(c *gin.Context) {
 	c.JSON(200, gin.H{})
 }
 
+func checkToken(c *gin.Context) {
+	defer func() {
+		if (recover() != nil) {
+			c.JSON(401, gin.H{"errorMsg": "token not found"})
+		}
+	}()
+	
+	token := c.Request.URL.Query()["token"][0]
+	
+	student, expired := findStudentGivenToken(token)
+	if student.Email == "" || expired {
+		c.JSON(401, gin.H{"errorMsg": "token not valid"})
+	} else {
+		c.JSON(200, gin.H{"errorMsg": ""})
+	}
+}
+
 func newUser(c *gin.Context) {
 	var student Student
 

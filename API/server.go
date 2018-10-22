@@ -41,6 +41,7 @@ func main() {
 			//basic user functions
 			user.POST("/login", login)
 			user.POST("/logout", logout)
+			user.GET("/checkToken", checkToken)
 			user.POST("/newUser", newUser)
 			user.POST("/deleteUser", deleteUser)
 

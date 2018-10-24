@@ -47,6 +47,39 @@ def enroll_in_course(token, course_id):
         return (FRC.CONNECTION_ERROR, False)
 
 
+def drop_course(token, course_id):
+    """
+
+    Removes a user from the course that is specified
+
+    Parameters
+    ----------
+        token : str
+            The user's token
+
+        course_id : int
+            The id of the course
+
+    Returns
+    -------
+        bool
+            if user was authenicated
+    """
+
+    data = {
+        "token": token,
+        "courseID": course_id,
+    }
+
+    try:
+        response = requests.post(f"{app.config['API_ENDPOINT']}/user/dropCourse", data=data)
+
+        return response.status_code == 200
+
+    except:
+        return False
+
+
 def get_enrolled_courses(token):
     """
 

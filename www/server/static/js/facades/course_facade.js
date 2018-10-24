@@ -29,8 +29,16 @@ modulejs.define('course_facade', ['request_manager'], function (request) {
             .post_json("/courses/enroll", { course_id: course_id })
     }
 
+    function dropCourse(course_id) {
+        console.log("%c Dropping course: " + course_id, "color: red; font-weight: 800")
+
+        return request
+            .post_json("/courses/drop", { course_id: course_id })
+    }
+
     return {
         searchCourses: searchCourses,
         enrollInCourse: enrollInCourse,
+        dropCourse: dropCourse,
     }
 })

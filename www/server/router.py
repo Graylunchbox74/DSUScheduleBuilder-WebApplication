@@ -5,7 +5,7 @@ from server.controllers.login_controller import LoginController, LogoutControlle
 from server.controllers.register_controller import RegisterController
 from server.controllers.schedule_controller import ScheduleController
 from server.controllers.course.search_controller import CourseSearchController, CourseEnrollingController
-from server.controllers.course.enrolled_controller import CoursesEnrolledController
+from server.controllers.course.enrolled_controller import CoursesEnrolledController, CourseDroppingController
 
 # Home page
 home_view = HomeController.as_view('index')
@@ -29,6 +29,9 @@ app.add_url_rule('/courses/enrolled', view_func=enrolled_courses_view)
 
 # Enrolling in courses
 app.add_url_rule('/courses/enroll', view_func=CourseEnrollingController.as_view('course_enrolling_hidden'))
+
+# Dropping courses
+app.add_url_rule('/courses/drop', view_func=CourseDroppingController.as_view('courses_dropping_hidden'))
 
 # Course search page
 app.add_url_rule('/courses/search', view_func=CourseSearchController.as_view('courses_search'))

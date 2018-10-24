@@ -356,6 +356,7 @@ func dropCourse(c *gin.Context) {
 	}
 	courseID, _ := strconv.Atoi(c.PostForm("courseID"))
 	db.Where("student_id = ? and course_id = ?", student.StudentID, courseID).Delete(&StudentToCourse{})
+	c.JSON(200, gin.H{"errorMsg": ""})
 }
 
 func searchForCourse(c *gin.Context) {

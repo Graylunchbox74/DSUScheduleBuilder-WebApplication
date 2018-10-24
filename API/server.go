@@ -27,7 +27,6 @@ func init() {
 	db.AutoMigrate(&Program{})
 	db.AutoMigrate(&StudentToCourse{})
 	db.AutoMigrate(&Course{})
-
 }
 
 func main() {

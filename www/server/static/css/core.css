@@ -1,6 +1,7 @@
 :root {
     --primary-background: #222;
     --secondary-background: #333;
+    --tertiary-background: #444;
 }
 
 * {
@@ -24,4 +25,12 @@ main {
 
 .secondary-background {
     background: var(--secondary-background);
+}
+
+.tertiary-background {
+    background: var(--tertiary-background);
+}
+
+.card-dark {
+    background: var(--tertiary-background);
 }

@@ -73,6 +73,21 @@ type Course struct {
 	Semester    string
 }
 
+<<<<<<< HEAD
+=======
+type PreviouslyEnrolled struct {
+	StudentID   uint64 `json:"studentID"`
+	Credits     uint64 `json:"credits"`
+	CollegeName string `json:"collegeName"`
+	CourseCode  uint64 `json:"courseCode"`
+}
+
+type RequirementCourse struct {
+	CollegeName string
+	CourseCode  uint64
+}
+
+>>>>>>> 9cd705bca3a93cdc64505b1856c4a878d2f36bea
 type returnStudent struct {
 	StudentID uint64 `json:"studentID"`
 	Email     string `json:"email"`

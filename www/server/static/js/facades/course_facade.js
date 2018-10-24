@@ -10,7 +10,7 @@ modulejs.define('course_facade', ['request_manager'], function (request) {
         let search_params = {};
         addParamIfNotEmpty(search_params, "college_name", search_terms.college_name)
         addParamIfNotEmpty(search_params, "course_code", search_terms.course_code)
-        addParamIfNotEmpty(search_params, "teacher_name", search_terms.teacher_name)
+        addParamIfNotEmpty(search_params, "teacher", search_terms.teacher_name)
         addParamIfNotEmpty(search_params, "location", search_terms.location)
         addParamIfNotEmpty(search_params, "semester", search_terms.semester)
         addParamIfNotEmpty(search_params, "course_name", search_terms.course_name)
@@ -22,7 +22,15 @@ modulejs.define('course_facade', ['request_manager'], function (request) {
             .post_json("/courses/search", search_params)
     }
 
+    function enrollInCourse(course_id) {
+        console.log("%c Enrolling in course: " + course_id, "color: green; font-weight: 800")
+
+        return request
+            .post_json("/courses/enroll", { course_id: course_id })
+    }
+
     return {
-        searchCourses: searchCourses
+        searchCourses: searchCourses,
+        enrollInCourse: enrollInCourse,
     }
 })

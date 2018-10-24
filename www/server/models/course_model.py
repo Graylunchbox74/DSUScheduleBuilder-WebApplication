@@ -55,6 +55,17 @@ class CourseModel(BaseModel):
 
         return s[:-2]
 
+    def convert_time(self, t):
+        hour = int(t / 100)
+        am_or_pm = "AM"
+        if hour >= 12:
+            am_or_pm = "PM"
+        if hour >= 13:
+            hour -= 12
+        minute = t % 100
+        return f"{str(hour)}:{str(minute).zfill(2)}{am_or_pm}"
+
+
     def from_json(self, data):
         try:
             self.course_id = int(data['course_id'])
@@ -63,8 +74,8 @@ class CourseModel(BaseModel):
             self.credits = int(data['credits'])
 
             self.days_of_week = self.convert_dow(int(data['days_of_week']))
-            self.start_time = int(data['start_time'])
-            self.end_time = int(data['end_time'])
+            self.start_time = self.convert_time(data['start_time'])
+            self.end_time = self.convert_time(data['end_time'])
 
             # These should be UTC, not str
             self.start_date = str(data['start_date'])

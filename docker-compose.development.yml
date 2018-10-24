@@ -11,7 +11,7 @@ services:
     ports:
       - 8079:8080
     volumes:
-      - ./API:/go/src/app
+      - ./API/db:/go/src/app/db
       
 
     # add depends_on and volumes later

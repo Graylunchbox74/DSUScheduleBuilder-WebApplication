@@ -30,3 +30,30 @@ class CourseSearchController(controllers.BaseController):
         course_list = list(map(lambda c: c.to_json(), courses))
 
         return flask.jsonify(course_list)
+
+
+class CourseEnrollingController(controllers.BaseController):
+    decorators = [controllers.login_required]
+
+    def post(self):
+        user = UserModel.create(**flask.session['user'])
+
+        course_id = flask.request.get_json().get('course_id')
+
+        if course_id == None:
+            return flask.jsonify({})
+
+        (status, conflicts) = course_facade.enroll_in_course(user.token, course_id)
+
+        if status == FRC.NOT_AUTHENTICATED:
+            return self.handle_not_authorized()
+        if status != FRC.SUCCESS:
+            if conflicts: 
+                flask.flash(f"The course you are trying to register for conflicts with a course you are already in.", "warning")
+            else:
+                flask.flash(f"There was an error registering for the course. Please try again later.", "danger")
+        else:
+            flask.flash(f"Successfully registered.", "success")
+
+        return flask.jsonify({})
+        

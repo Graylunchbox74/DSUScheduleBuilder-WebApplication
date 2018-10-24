@@ -9,8 +9,10 @@ RUN go get -d -v github.com/jinzhu/gorm
 RUN go get -d -v github.com/jinzhu/gorm/dialects/postgres
 RUN go get -d -v github.com/jinzhu/gorm/dialects/sqlite
 
-RUN go install -v ./
+# RUN go install -v ./
 
 EXPOSE 8080
 
-CMD ["go", "run", "server.go"]
+RUN go build server.go adminFunctions.go userFunctions.go models.go
+
+CMD ["./server"]

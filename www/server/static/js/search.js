@@ -32,20 +32,35 @@ $(function () {
 
     function renderCourse(course) {
         return `
-            <div class="row p-2 border-bottom border-dark">
-                <div class="row w-100">
+            <div class="d-flex flex-wrap py-3 my-2 secondary-background">
+                <div class="d-flex w-100">
                     <div class="col-md-8"><strong>${course.college_name}-${course.course_code}</strong>: ${course.course_name}</div>
-                    <div class="col-md-4 text-right">${course.teacher}</div>
+                    <div class="col-md-2 text-right">${course.days_of_week}</div>
+                    <div class="col-md-2 text-right">${course.start_time} - ${course.end_time}</div>
                 </div>
-                <div class="row mt-4 w-100">
-                    <div class="col-md-4 col-sm-12">${course.days_of_week}</div>
-                    <div class="col-md-4 col-sm-12 text-center">${course.start_time} - ${course.end_time}</div>
+                <div class="d-flex flex-wrap mt-4 w-100">
+                    <div class="col-md-8 col-sm-12">${course.teacher}</div>
                     <div class="col-md-4 col-sm-12 text-right">
-                        <button class="btn btn-primary">More details</button>
+                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#course-description-${course.course_id}">More details</button>
+                    </div>
+                </div>
+                <div class="mt-4 w-100 collapse" id="course-description-${course.course_id}" data-parent="#search-container">
+                    <div class="card card-body card-dark">
+                        <h3>Description:</h3>
+                        <p>${course.description}</p>
+                        <div class="text-right">
+                            <button class="btn btn-primary" onclick="enrollInCourse(${course.course_id})">Enroll</button>
+                        </div>
                     </div>
                 </div>
             </div>
         `
+    }
+
+    window.enrollInCourse = function(course_id) {
+        course_facade.enrollInCourse(course_id).then(_ => {
+            window.location.reload()
+        })
     }
 
     let $searchContainer = $("#search-container")

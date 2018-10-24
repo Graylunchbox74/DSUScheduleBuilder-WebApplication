@@ -486,7 +486,7 @@ func searchPrograms(c *gin.Context) {
 	program.CatalogYear = uint64(tmp)
 
 	returnPrograms := []Program{}
-	db.Where("programs like ", "%"+program.Program+"%").Find(&returnPrograms)
+	db.Where("program like ?", "%"+program.Program+"%").Find(&returnPrograms)
 
 	c.JSON(200, returnPrograms)
 }

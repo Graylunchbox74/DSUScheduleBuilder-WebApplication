@@ -60,7 +60,7 @@ func main() {
 			user.POST("/removeStudentProgram", removeProgram)
 			user.GET("/getUsersPrograms")
 			user.GET("/getProgramRequirements")
-			user.GET("/searchForProgram")
+			user.GET("/searchPrograms", searchPrograms)
 			user.GET("/getRemainingProgramRequirements")
 		}
 		adm := api.Group("/admin")

@@ -106,13 +106,13 @@ func logout(c *gin.Context) {
 
 func checkToken(c *gin.Context) {
 	defer func() {
-		if (recover() != nil) {
+		if recover() != nil {
 			c.JSON(401, gin.H{"errorMsg": "token not found"})
 		}
 	}()
-	
+
 	token := c.Request.URL.Query()["token"][0]
-	
+
 	student, expired := findStudentGivenToken(token)
 	if student.Email == "" || expired {
 		c.JSON(401, gin.H{"errorMsg": "token not valid"})
@@ -464,4 +464,29 @@ func getProgramRequirements(c *gin.Context) {
 		return
 	}
 
+}
+
+func searchPrograms(c *gin.Context) {
+	token := c.PostForm("token")
+	var student Student
+	student, isExpired := findStudentGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if student.StudentID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "student not found"})
+		return
+	}
+
+	program := Program{}
+	program.Program = c.Request.URL.Query()["programName"][0]
+	strTmp := c.Request.URL.Query()["catalogYear"][0]
+	tmp, _ := strconv.Atoi(strTmp)
+	program.CatalogYear = uint64(tmp)
+
+	returnPrograms := []Program{}
+	db.Where("programs like ", "%"+program.Program+"%").Find(&returnPrograms)
+
+	c.JSON(200, returnPrograms)
 }

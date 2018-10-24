@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 	"strconv"
 	"time"
 
@@ -489,4 +490,85 @@ func searchPrograms(c *gin.Context) {
 	db.Where("program like ?", "%"+program.Program+"%").Find(&returnPrograms)
 
 	c.JSON(200, returnPrograms)
+}
+
+func getRemainingProgramRequirements(c *gin.Context) {
+	token := c.PostForm("token")
+	var student Student
+	student, isExpired := findStudentGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if student.StudentID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "student not found"})
+		return
+	}
+
+	programIDString := c.Request.URL.Query()["programID"][0]
+	tmp, _ := strconv.Atoi(programIDString)
+	program := StudentProgram{}
+	program.ProgramID = uint64(tmp)
+
+	includeCurrentlyEnrolled := c.Request.URL.Query()["includeCurrentlyEnrolled"][0]
+
+	db.Where(program).First(&program)
+	if program.ProgramID == 0 {
+		c.JSON(200, program)
+		return
+	}
+
+	//we now have the program
+	//now we need a list of requirements with this program
+	programReqirements := []StudentProgramRequirement{}
+	db.Where("program_id = ?", program.ProgramID).Find(&programReqirements)
+
+	//now that we have the requirements we need to get the courses the user has taken
+	//along with the courses they are currently in
+	previousCourses := []PreviouslyEnrolled{}
+	db.Where("student_id = ?", student.StudentID).Find(&previousCourses)
+
+	//get the courses the user is currently enrolled in (if the flag is set)
+	if includeCurrentlyEnrolled == "1" {
+		currentlyEnrolled := []StudentToCourse{}
+		db.Where("student_id = ?", student.StudentID).Find(&currentlyEnrolled)
+		for _, row := range currentlyEnrolled {
+			course := Course{}
+			db.Where("course_id = ?", row.CourseID).Find(&course)
+			appendCourse := PreviouslyEnrolled{CollegeName: course.CollegeName, CourseCode: course.CourseCode}
+			previousCourses = append(previousCourses, appendCourse)
+		}
+	}
+
+	//now everything is stored in programRequirements and prevCourses
+	//sort the requirements based on their amount of classes they require
+	sort.SliceStable(programReqirements, func(i, j int) bool {
+		return programReqirements[i].NumberToTake < programReqirements[j].NumberToTake
+	})
+
+	listToReturn := []returnRequirement{}
+	for _, currentRequirement := range programReqirements {
+		currentRequirementTest := returnRequirement{}
+		currentRequirementTest.requirementName = currentRequirement.RequirementName
+		listOfCoursesThatCountForRequirement := []RequirementCourse{}
+		db.Where("requirement_course_id = ?", currentRequirement.RequirementCourseID).Find(&listOfCoursesThatCountForRequirement)
+		for i := uint64(0); i < currentRequirement.NumberToTake; i++ {
+		RequirementCourseLabel:
+			for _, currentRequirementCourse := range listOfCoursesThatCountForRequirement {
+				for i := 0; i < len(previousCourses); i++ {
+					if currentRequirementCourse.CollegeName == previousCourses[i].CollegeName && currentRequirementCourse.CourseCode == previousCourses[i].CourseCode {
+						stringOfCourseCode := strconv.Itoa(int(previousCourses[i].CourseCode))
+						currentRequirementTest.courses = append(currentRequirementTest.courses, previousCourses[i].CollegeName+" "+stringOfCourseCode)
+						//delete the course from previously enrolled so we don't double count it for something else
+						previousCourses = append(previousCourses[:i], previousCourses[i+1:]...)
+						break RequirementCourseLabel
+					}
+				}
+			}
+		}
+		listToReturn = append(listToReturn, currentRequirementTest)
+	}
+
+	c.JSON(200, listToReturn)
+
 }

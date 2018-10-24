@@ -1,13 +1,13 @@
 $(function () {
 
-    let course_facade = modulejs.require("course_facade");
+    let course_facade = modulejs.require("course_facade")
 
-    let $college_name = $("#collegeName");
-    let $course_number = $("#courseNumber");
-    let $teacher_name = $("#teacherName");
-    let $location = $("#location");
-    let $semester = $("#semester");
-    let $course_name = $("#courseName");
+    let $college_name = $("#collegeName")
+    let $course_number = $("#courseNumber")
+    let $teacher_name = $("#teacherName")
+    let $location = $("#location")
+    let $semester = $("#semester")
+    let $course_name = $("#courseName")
 
     function getCoursesFromSearchTerms() {
         let college_name = $college_name.val()
@@ -57,7 +57,7 @@ $(function () {
         `
     }
 
-    window.enrollInCourse = function(course_id) {
+    window.enrollInCourse = function (course_id) {
         course_facade.enrollInCourse(course_id).then(_ => {
             window.location.reload()
         })

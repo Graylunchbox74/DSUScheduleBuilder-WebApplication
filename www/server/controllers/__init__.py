@@ -3,6 +3,7 @@ from flask import session, redirect, url_for
 from server import app
 
 from server.models.user_model import UserModel
+from server.facades import user_facade
 
 import flask
 from flask.views import MethodView
@@ -33,7 +34,19 @@ def inject_globals():
 def login_required(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
+        logged_in = True
+
         if session.get('user') is None:
+            logged_in = False
+        else:
+            user = UserModel.create(**session.get('user'))
+            if not user_facade.check_user_token(user.token):
+                logged_in = False
+
+        if not logged_in:
+            session['user'] = None
+
+            flask.flash(f"Your session has expired. Please log in again.", "danger")
             return redirect(url_for('login'))
         return func(*args, **kwargs)
 

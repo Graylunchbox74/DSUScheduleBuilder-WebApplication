@@ -46,6 +46,23 @@ func findAdminGivenToken(token string) (Admin, bool) {
 	return admin, false
 }
 
+func checkTokenAdmin(c *gin.Context) {
+	defer func() {
+		if recover() != nil {
+			c.JSON(401, gin.H{"errorMsg": "token not found"})
+		}
+	}()
+
+	token := c.Request.URL.Query()["token"][0]
+
+	admin, expired := findAdminGivenToken(token)
+	if admin.ID == 0 || expired {
+		c.JSON(401, gin.H{"errorMsg": "token not valid"})
+	} else {
+		c.JSON(200, gin.H{"errorMsg": ""})
+	}
+}
+
 func admLogin(c *gin.Context) {
 	email := c.PostForm("email")
 	password := c.PostForm("password")
@@ -213,6 +230,7 @@ func addRequirementToProgram(c *gin.Context) {
 		return
 	}
 	programID := c.PostForm("programID")
+	//	requirementID :=
 	collegeName := c.PostForm("collegeName")
 	courseCodeString := c.PostForm("courseCode")
 

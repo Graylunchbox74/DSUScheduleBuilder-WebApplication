@@ -72,6 +72,8 @@ func main() {
 		adm := api.Group("/admin")
 		{
 			adm.POST("/login", admLogin)
+			adm.POST("/logout", admLogout)
+			adm.POST("/checkToken", checkTokenAdmin)
 			adm.POST("/addProgram", addProgram)
 			adm.POST("/deleteProgram", deleteProgram)
 			adm.POST("/addRequirementToProgram")

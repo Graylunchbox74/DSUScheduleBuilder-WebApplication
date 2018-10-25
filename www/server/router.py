@@ -6,6 +6,7 @@ from server.controllers.register_controller import RegisterController
 from server.controllers.schedule_controller import ScheduleController
 from server.controllers.course.search_controller import CourseSearchController, CourseEnrollingController
 from server.controllers.course.enrolled_controller import CoursesEnrolledController, CourseDroppingController
+from server.controllers.program.enrolled_controller import ProgramsEnrolledController
 
 # Home page
 home_view = HomeController.as_view('index')
@@ -35,6 +36,11 @@ app.add_url_rule('/courses/drop', view_func=CourseDroppingController.as_view('co
 
 # Course search page
 app.add_url_rule('/courses/search', view_func=CourseSearchController.as_view('courses_search'))
+
+
+enrolled_programs_view = ProgramsEnrolledController.as_view('programs_enrolled')
+app.add_url_rule('/programs', view_func=enrolled_programs_view)
+app.add_url_rule('/programs/enrolled', view_func=enrolled_programs_view)
 
 
 ###################### ADMIN ROUTES #########################

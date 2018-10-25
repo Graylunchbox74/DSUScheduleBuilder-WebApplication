@@ -1,0 +1,32 @@
+{% extends 'partials/_layout.html' %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/managers/request_manager.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<h1>Enrolled Programs</h1>
+<div class="w-100" id="enrolled-container">
+    {% for prog in programs %}
+    <div class="d-flex flex-wrap py-3 my-2 w-100 secondary-background">
+        <div class="d-flex w-100">
+            <div class="col-md-8"><strong>{{ prog.program }}</strong></div>
+            <div class="col-md-4 text-right">{{ prog.catalog_year }}</div>
+        </div>
+        <div class="d-flex flex-wrap mt-4 w-100">
+            <div class="col-md-8 col-sm-12"></div>
+            <div class="col-md-4 col-sm-12 text-right">
+                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#program-description-{{prog.program_id}}">Options</button>
+            </div>
+        </div>
+        <div class="mt-4 w-100 collapse" id="program-description-{{prog.program_id}}" data-parent="#enrolled-container">
+            <div class="card card-body card-dark">
+                <div class="text-right">
+                    <button class="btn btn-primary" onclick="dropCourse({{ prog.program_id }})">Drop program</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

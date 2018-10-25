@@ -8,8 +8,8 @@
 
 {% block content %}
 <h1>Enrolled Courses</h1>
-{% for course in courses %}
 <div class="w-100" id="enrolled-container">
+    {% for course in courses %}
     <div class="d-flex flex-wrap py-3 my-2 w-100 secondary-background">
         <div class="d-flex w-100">
             <div class="col-md-8"><strong>{{course.college_name}}-{{course.course_code}}</strong>: {{course.course_name}}</div>
@@ -32,6 +32,6 @@
             </div>
         </div>
     </div>
+    {% endfor %}
 </div>
-{% endfor %}
 {% endblock %}

@@ -16,6 +16,9 @@
                 <li class="nav-item {{ 'active' if selected_tab == 'courses' else '' }}">
                     <a class="nav-link" href="{{ url_for('courses_enrolled') }}">Courses</a>
                 </li>
+                <li class="nav-item {{ 'active' if selected_tab == 'programs' else '' }}">
+                    <a class="nav-link" href="{{ url_for('programs_enrolled') }}">Programs</a>
+                </li>
             </ul>
 
             <ul class="navbar-nav">

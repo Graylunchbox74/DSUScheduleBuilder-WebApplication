@@ -42,7 +42,7 @@ func findAdminGivenToken(token string) (Admin, bool) {
 
 	sessiontoken.TimeUpdated = time.Now()
 
-	db.Where(Student{StudentID: sessiontoken.AdminID}).First(&admin)
+	db.Where(Admin{ID: sessiontoken.AdminID}).First(&admin)
 	return admin, false
 }
 
@@ -244,9 +244,14 @@ func addCourseToProgramRequirement(c *gin.Context) {
 		return
 	}
 	programID := c.PostForm("programID")
-	//	requirementID := c.PostForm("requirementID")
+	requirementIDString := c.PostForm("requirementID")
 	collegeName := c.PostForm("collegeName")
 	courseCodeString := c.PostForm("courseCode")
+
+	// tmp, _ := strconv.Atoi(requirementIDString)
+
+	// programRequirement := ProgramRequirement{}
+	db.Where("program_requirement_id = ?")
 
 	courseCodeInt, _ := strconv.Atoi(courseCodeString)
 	requirementCourse := RequirementCourse{}

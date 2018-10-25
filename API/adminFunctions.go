@@ -265,9 +265,17 @@ func addCourseToProgramRequirement(c *gin.Context) {
 	}
 	requirementCourse = testReqCourse
 
-	// classesAlreadyRequired := []RequirementCourse{}
-	// requirementClasses := []RequirementToRequirementCourse{}
-	db.Where("program_requirement_id = ?", programRequirement.ProgramID)
+	requirementClasses := RequirementToRequirementCourse{}
+	db.Where("program_requirement_id = ? and requirement_course_id = ?", programRequirement.ProgramRequirementID, requirementCourse.RequirementCourseID).Find(&requirementClasses)
+	if requirementClasses.ProgramRequirementID != 0 {
+		c.JSON(200, gin.H{})
+		return
+	}
+
+	requirementClasses.ProgramRequirementID = programRequirement.ProgramRequirementID
+	requirementClasses.RequirementCourseID = requirementCourse.RequirementCourseID
+
+	db.Create(&requirementClasses)
 
 	c.JSON(200, gin.H{})
 }

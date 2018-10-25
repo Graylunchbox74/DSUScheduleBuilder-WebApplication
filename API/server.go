@@ -58,15 +58,23 @@ func main() {
 			user.POST("/addStudentProgram", addProgramUser)
 			user.POST("/removeStudentProgram", removeProgram)
 			user.GET("/getUsersPrograms")
-			user.GET("/getProgramRequirements")
+			user.GET("/getProgramRequirements", getProgramRequirements)
 			user.GET("/searchPrograms", searchPrograms)
-			user.GET("/getRemainingProgramRequirements")
+			user.GET("/getRemainingProgramRequirements", getRemainingProgramRequirements)
+
+			//functions that are annoying to make
+			user.POST("/getAllSemesters")
+			user.POST("/getAllPrograms")
+			user.POST("/getAllCatalogYearsForProgram")
 		}
 		adm := api.Group("/admin")
 		{
 			adm.POST("/addProgram", addProgram)
 			adm.POST("/deleteProgram", deleteProgram)
+			adm.POST("/addRequirementToProgram")
+			adm.POST("/deleteRequirementFromProgram")
 			adm.POST("/addCourse", addCourse)
+			adm.POST("/deleteCourse", deleteCourse)
 		}
 	}
 

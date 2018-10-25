@@ -45,9 +45,10 @@ type StudentProgram struct {
 }
 
 type ProgramRequirement struct {
-	RequirementName string
-	ProgramID       uint64 `gorm:"foreignkey:ProgramID;association_foreignkey:ProgramID"`
-	NumberToTake    uint64
+	RequirementName      string
+	ProgramID            uint64 `gorm:"foreignkey:ProgramID;association_foreignkey:ProgramID"`
+	ProgramRequirementID uint64 `gorm:"primary_key"`
+	NumberToTake         uint64
 }
 
 type StudentProgramRequirement struct {

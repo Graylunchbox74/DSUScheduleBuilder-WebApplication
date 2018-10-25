@@ -76,3 +76,36 @@ func addCourse(c *gin.Context) {
 
 	c.JSON(200, gin.H{})
 }
+
+func deleteCourse(c *gin.Context) {
+	courseIDString := c.PostForm("courseID")
+	tmp, _ := strconv.Atoi(courseIDString)
+	var course Course
+	db.Where("course_id = ?", uint64(tmp)).Delete(&course)
+
+	c.JSON(200, gin.H{})
+}
+
+func addRequirementToProgram(c *gin.Context) {
+	programID := c.PostForm("programID")
+	collegeName := c.PostForm("collegeName")
+	courseCodeString := c.PostForm("courseCode")
+
+	courseCodeInt, _ := strconv.Atoi(courseCodeString)
+	requirementCourse := RequirementCourse{}
+	requirementCourse.CourseCode = uint64(courseCodeInt)
+	requirementCourse.CollegeName = collegeName
+
+	program := Program{}
+
+	testReqCourse := RequirementCourse{}
+	db.Where(requirementCourse).First(&testReqCourse)
+	if testReqCourse.CourseCode == 0 {
+		db.Create(&requirementCourse)
+		db.Where(requirementCourse).First(&testReqCourse)
+	}
+	requirementCourse = testReqCourse
+
+	db.Where("program_id = ?", programID).First(&program)
+
+}

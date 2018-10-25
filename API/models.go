@@ -13,7 +13,7 @@ type Admin struct {
 type AdminSessionToken struct {
 	AdminID     uint64
 	Token       string `gorm:"unique:"`
-	TimeUpdated time.time
+	TimeUpdated time.Time
 }
 
 type SessionToken struct {

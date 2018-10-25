@@ -19,9 +19,32 @@ func createUniqueKeyAdmin(id uint64) string {
 	adminToken.AdminID = id
 	adminToken.Token = keyToTry
 	adminToken.TimeUpdated = time.Now()
-	db.Create(&studentToken)
+	db.Create(&adminToken)
 	return adminToken.Token
 }
+
+// func findAdminGivenToken(token string) (Student, bool) {
+// 	var admin Admin
+// 	var sessiontoken AdminSessionToken
+// 	db.Where(AdminSessionToken{AdminID: 0, Token: token}).First(&sessiontoken)
+
+// 	if sessiontoken.AdminID == 0 {
+// 		return student, false
+// 	}
+
+// 	println(sessiontoken.TimeUpdated.String())
+// 	println(time.Now().Add(time.Minute).String())
+
+// 	//session expires after a day
+// 	if time.Now().After(sessiontoken.TimeUpdated.AddDate(0, 0, 1)) {
+// 		return student, true
+// 	}
+
+// 	sessiontoken.TimeUpdated = time.Now()
+
+// 	db.Where(Student{StudentID: sessiontoken.StudentID}).First(&student)
+// 	return student, false
+// }
 
 func admLogin(c *gin.Context) {
 	email := c.PostForm("email")
@@ -46,6 +69,18 @@ func admLogin(c *gin.Context) {
 }
 
 func addProgram(c *gin.Context) {
+	// token := c.PostForm("token")
+	// var admin Admin
+	// admin, isExpired := findAdminGivenToken(token)
+	// if isExpired {
+	// 	c.JSON(401, gin.H{"errorMsg": "token expired"})
+	// 	return
+	// }
+	// if admin.ID == 0 {
+	// 	c.JSON(401, gin.H{"errorMsg": "student not found"})
+	// 	return
+	// }
+
 	var program Program
 	program.Major = (c.PostForm("major") == "1")
 	program.Program = c.PostForm("program")

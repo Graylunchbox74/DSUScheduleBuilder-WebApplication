@@ -58,7 +58,7 @@ func main() {
 			//programs/majors/minors
 			user.POST("/addStudentProgram", addProgramUser)
 			user.POST("/removeStudentProgram", removeProgram)
-			user.GET("/getUsersPrograms")
+			user.GET("/getUsersPrograms", getUsersPrograms)
 			user.GET("/getProgramRequirements", getProgramRequirements)
 			user.GET("/searchPrograms", searchPrograms)
 			user.GET("/getRemainingProgramRequirements", getRemainingProgramRequirements)

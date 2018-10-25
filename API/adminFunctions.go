@@ -243,22 +243,19 @@ func addCourseToProgramRequirement(c *gin.Context) {
 		c.JSON(401, gin.H{"errorMsg": "admin not found"})
 		return
 	}
-	programID := c.PostForm("programID")
-	// requirementIDString := c.PostForm("requirementID")
+	requirementIDString := c.PostForm("requirementID")
 	collegeName := c.PostForm("collegeName")
 	courseCodeString := c.PostForm("courseCode")
 
-	// tmp, _ := strconv.Atoi(requirementIDString)
+	tmp, _ := strconv.Atoi(requirementIDString)
 
-	// programRequirement := ProgramRequirement{}
-	db.Where("program_requirement_id = ?")
+	programRequirement := ProgramRequirement{}
+	db.Where("program_requirement_id = ?", uint64(tmp)).First(&programRequirement)
 
 	courseCodeInt, _ := strconv.Atoi(courseCodeString)
 	requirementCourse := RequirementCourse{}
 	requirementCourse.CourseCode = uint64(courseCodeInt)
 	requirementCourse.CollegeName = collegeName
-
-	program := Program{}
 
 	testReqCourse := RequirementCourse{}
 	db.Where(requirementCourse).First(&testReqCourse)
@@ -268,6 +265,9 @@ func addCourseToProgramRequirement(c *gin.Context) {
 	}
 	requirementCourse = testReqCourse
 
-	db.Where("program_id = ?", programID).First(&program)
+	// classesAlreadyRequired := []RequirementCourse{}
+	// requirementClasses := []RequirementToRequirementCourse{}
+	db.Where("program_requirement_id = ?", programRequirement.ProgramID)
 
+	c.JSON(200, gin.H{})
 }

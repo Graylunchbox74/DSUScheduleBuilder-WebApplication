@@ -88,9 +88,9 @@ type PreviouslyEnrolled struct {
 	CourseCode  uint64 `json:"courseCode"`
 }
 
-type ProgramToRequirementCourse struct {
-	ProgramID           uint64
-	RequirementCourseID uint64
+type RequirementToRequirementCourse struct {
+	ProgramRequirementID uint64
+	RequirementCourseID  uint64
 }
 
 type RequirementCourse struct {

@@ -35,3 +35,16 @@ app.add_url_rule('/courses/drop', view_func=CourseDroppingController.as_view('co
 
 # Course search page
 app.add_url_rule('/courses/search', view_func=CourseSearchController.as_view('courses_search'))
+
+
+###################### ADMIN ROUTES #########################
+
+from server.controllers.admin.login_controller import AdminLoginController, AdminLogoutController
+from server.controllers.admin.index_controller import AdminIndexController
+
+# Admin index page
+app.add_url_rule('/admin', view_func=AdminIndexController.as_view('admin_index'))
+
+# Login and logout
+app.add_url_rule('/admin/login', view_func=AdminLoginController.as_view('admin_login'))
+app.add_url_rule('/admin/logout', view_func=AdminLogoutController.as_view('admin_logout'))

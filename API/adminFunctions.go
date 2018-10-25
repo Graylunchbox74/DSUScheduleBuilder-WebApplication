@@ -68,6 +68,12 @@ func admLogin(c *gin.Context) {
 	c.JSON(200, adminReturn)
 }
 
+func admLogout(c *gin.Context) {
+	token := c.PostForm("token")
+	db.Where(AdminSessionToken{AdminID: 0, Token: token}).Delete(&AdminSessionToken{})
+	c.JSON(200, gin.H{})
+}
+
 func addProgram(c *gin.Context) {
 	token := c.PostForm("token")
 	var admin Admin
@@ -77,7 +83,7 @@ func addProgram(c *gin.Context) {
 		return
 	}
 	if admin.ID == 0 {
-		c.JSON(401, gin.H{"errorMsg": "student not found"})
+		c.JSON(401, gin.H{"errorMsg": "admin not found"})
 		return
 	}
 
@@ -101,6 +107,17 @@ func addProgram(c *gin.Context) {
 }
 
 func deleteProgram(c *gin.Context) {
+	token := c.PostForm("token")
+	var admin Admin
+	admin, isExpired := findAdminGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if admin.ID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "admin not found"})
+		return
+	}
 	var program Program
 	stringID := c.PostForm("programID")
 	tmpID, _ := strconv.Atoi(stringID)
@@ -115,6 +132,17 @@ func deleteProgram(c *gin.Context) {
 }
 
 func addCourse(c *gin.Context) {
+	token := c.PostForm("token")
+	var admin Admin
+	admin, isExpired := findAdminGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if admin.ID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "admin not found"})
+		return
+	}
 	var course Course
 	course.CollegeName = c.PostForm("collegeName")
 
@@ -152,6 +180,18 @@ func addCourse(c *gin.Context) {
 }
 
 func deleteCourse(c *gin.Context) {
+	token := c.PostForm("token")
+	var admin Admin
+	admin, isExpired := findAdminGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if admin.ID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "admin not found"})
+		return
+	}
+
 	courseIDString := c.PostForm("courseID")
 	tmp, _ := strconv.Atoi(courseIDString)
 	var course Course
@@ -161,6 +201,17 @@ func deleteCourse(c *gin.Context) {
 }
 
 func addRequirementToProgram(c *gin.Context) {
+	token := c.PostForm("token")
+	var admin Admin
+	admin, isExpired := findAdminGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if admin.ID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "admin not found"})
+		return
+	}
 	programID := c.PostForm("programID")
 	collegeName := c.PostForm("collegeName")
 	courseCodeString := c.PostForm("courseCode")

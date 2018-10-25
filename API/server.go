@@ -27,6 +27,7 @@ func init() {
 	db.AutoMigrate(&Program{})
 	db.AutoMigrate(&StudentToCourse{})
 	db.AutoMigrate(&Course{})
+	db.AutoMigrate(&AdminSessionToken{})
 }
 
 func main() {

@@ -1,0 +1,31 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('index') }}">{{ globals.brand_name }}</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav mr-auto">
+                <!-- <li class="nav-item {{ 'active' if selected_tab == 'home' else '' }}">
+                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                </li>
+                <li class="nav-item {{ 'active' if selected_tab == 'schedule' else '' }}">
+                    <a class="nav-link" href="{{ url_for('schedule') }}">Schedule</a>
+                </li>
+                <li class="nav-item {{ 'active' if selected_tab == 'courses' else '' }}">
+                    <a class="nav-link" href="{{ url_for('courses_enrolled') }}">Courses</a>
+                </li> -->
+            </ul>
+
+            <ul class="navbar-nav">
+                {% if session['admin'] %}
+                <a class="nav-item nav-link" href="{{ url_for('admin_logout') }}">Log out</a>
+                {% else %}
+                <a class="nav-item nav-link" href="/admin/login">Log in</a>
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+</nav>

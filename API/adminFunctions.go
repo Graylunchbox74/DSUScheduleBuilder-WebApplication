@@ -229,8 +229,22 @@ func addRequirementToProgram(c *gin.Context) {
 		c.JSON(401, gin.H{"errorMsg": "admin not found"})
 		return
 	}
+}
+
+func addCourseToProgramRequirement(c *gin.Context) {
+	token := c.PostForm("token")
+	var admin Admin
+	admin, isExpired := findAdminGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if admin.ID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "admin not found"})
+		return
+	}
 	programID := c.PostForm("programID")
-	//	requirementID :=
+	requirementID := c.PostForm("requirementID")
 	collegeName := c.PostForm("collegeName")
 	courseCodeString := c.PostForm("courseCode")
 

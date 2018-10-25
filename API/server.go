@@ -73,7 +73,7 @@ func main() {
 		{
 			adm.POST("/login", admLogin)
 			adm.POST("/logout", admLogout)
-			adm.POST("/checkToken", checkTokenAdmin)
+			adm.GET("/checkToken", checkTokenAdmin)
 			adm.POST("/addProgram", addProgram)
 			adm.POST("/deleteProgram", deleteProgram)
 			adm.POST("/addRequirementToProgram")

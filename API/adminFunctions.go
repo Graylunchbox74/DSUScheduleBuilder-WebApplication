@@ -2,9 +2,48 @@ package main
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+func createUniqueKeyAdmin(id uint64) string {
+	keyToTry := randStringRunes(50)
+	var adminToken AdminSessionToken
+	db.Where(AdminSessionToken{AdminID: 0, Token: keyToTry}).First(&adminToken)
+	for adminToken.AdminID != 0 {
+		keyToTry := randStringRunes(50)
+		db.Where(AdminSessionToken{AdminID: 0, Token: keyToTry}).First(&adminToken)
+	}
+
+	adminToken.AdminID = id
+	adminToken.Token = keyToTry
+	adminToken.TimeUpdated = time.Now()
+	db.Create(&studentToken)
+	return adminToken.Token
+}
+
+func admLogin(c *gin.Context) {
+	email := c.PostForm("email")
+	password := c.PostForm("password")
+
+	admin := Admin{}
+	db.Where("email = ? and password = ?", email, password).First(&admin)
+	if admin.ID == 0 {
+		c.JSON(400, gin.H{})
+		return
+	}
+	token := createUniqueKeyAdmin(admin.ID)
+
+	adminReturn := returnStudent{}
+	adminReturn.Email = admin.Email
+	adminReturn.FirstName = admin.FirstName
+	adminReturn.LastName = admin.LastName
+	adminReturn.StudentID = admin.ID
+	adminReturn.Token = token
+
+	c.JSON(200, adminReturn)
+}
 
 func addProgram(c *gin.Context) {
 	var program Program
@@ -75,4 +114,37 @@ func addCourse(c *gin.Context) {
 	db.Create(&course)
 
 	c.JSON(200, gin.H{})
+}
+
+func deleteCourse(c *gin.Context) {
+	courseIDString := c.PostForm("courseID")
+	tmp, _ := strconv.Atoi(courseIDString)
+	var course Course
+	db.Where("course_id = ?", uint64(tmp)).Delete(&course)
+
+	c.JSON(200, gin.H{})
+}
+
+func addRequirementToProgram(c *gin.Context) {
+	programID := c.PostForm("programID")
+	collegeName := c.PostForm("collegeName")
+	courseCodeString := c.PostForm("courseCode")
+
+	courseCodeInt, _ := strconv.Atoi(courseCodeString)
+	requirementCourse := RequirementCourse{}
+	requirementCourse.CourseCode = uint64(courseCodeInt)
+	requirementCourse.CollegeName = collegeName
+
+	program := Program{}
+
+	testReqCourse := RequirementCourse{}
+	db.Where(requirementCourse).First(&testReqCourse)
+	if testReqCourse.CourseCode == 0 {
+		db.Create(&requirementCourse)
+		db.Where(requirementCourse).First(&testReqCourse)
+	}
+	requirementCourse = testReqCourse
+
+	db.Where("program_id = ?", programID).First(&program)
+
 }

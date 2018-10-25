@@ -464,6 +464,40 @@ func getProgramRequirements(c *gin.Context) {
 		return
 	}
 
+	program := Program{}
+	programString := c.Request.URL.Query()["programID"][0]
+	tmp, _ := strconv.Atoi(programString)
+	program.ProgramID = uint64(tmp)
+
+	db.Where(program).Find(&program)
+	if program.ProgramID == 0 {
+		c.JSON(200, program)
+	}
+
+	programReq := []ProgramRequirement{}
+
+	db.Where("program_id = ?", program.ProgramID).Find(&programReq)
+
+	c.JSON(200, programReq)
+}
+
+func getUsersPrograms(c *gin.Context) {
+	token := c.PostForm("token")
+	var student Student
+	student, isExpired := findStudentGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if student.StudentID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "student not found"})
+		return
+	}
+
+	programs := []Program{}
+	db.Where("student_id = ?", student.StudentID).Find(&programs)
+
+	c.JSON(200, programs)
 }
 
 func searchPrograms(c *gin.Context) {

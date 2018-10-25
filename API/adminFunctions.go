@@ -244,7 +244,7 @@ func addCourseToProgramRequirement(c *gin.Context) {
 		return
 	}
 	programID := c.PostForm("programID")
-	requirementID := c.PostForm("requirementID")
+	//	requirementID := c.PostForm("requirementID")
 	collegeName := c.PostForm("collegeName")
 	courseCodeString := c.PostForm("courseCode")
 

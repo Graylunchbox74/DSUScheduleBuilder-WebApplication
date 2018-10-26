@@ -498,7 +498,7 @@ func getRemainingProgramRequirements(c *gin.Context) {
 		currentRequirementTest := returnRequirement{}
 		currentRequirementTest.requirementName = currentRequirement.RequirementName
 		listOfCoursesThatCountForRequirement := []RequirementCourse{}
-		db.Where("requirement_course_id = ?", currentRequirement.RequirementCourseID).Find(&listOfCoursesThatCountForRequirement)
+		db.Where("program_requirement_id = ?", currentRequirement.ProgramRequirementID).Find(&listOfCoursesThatCountForRequirement)
 		for i := uint64(0); i < currentRequirement.NumberToTake; i++ {
 		RequirementCourseLabel:
 			for _, currentRequirementCourse := range listOfCoursesThatCountForRequirement {

@@ -279,3 +279,76 @@ func addCourseToProgramRequirement(c *gin.Context) {
 
 	c.JSON(200, gin.H{})
 }
+
+func addGreaterThanRequirementToProgram(c *gin.Context) {
+	token := c.PostForm("token")
+	var admin Admin
+	admin, isExpired := findAdminGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if admin.ID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "admin not found"})
+		return
+	}
+
+	greaterThanRequirement := RequirementToRequirementGreaterThan{}
+	greaterThanRequirement.CollegeName = c.PostForm("collegeName")
+	courseCodeString := c.PostForm("courseCode")
+	courseCode, _ := strconv.Atoi(courseCodeString)
+	greaterThanRequirement.CourseCodeMinimum = uint64(courseCode)
+	requirementIDString := c.PostForm("requirementID")
+	requirementID, _ := strconv.Atoi(requirementIDString)
+	greaterThanRequirement.ProgramRequirementID = uint64(requirementID)
+
+	program := Program{}
+	db.Where("program_requirement_id = ?", greaterThanRequirement.ProgramRequirementID).First(&program)
+	//make sure this program exists
+	if program.ProgramID == 0 {
+		c.JSON(200, gin.H{})
+		return
+	}
+	//make sure that this requirement does not already exist
+	greaterThanRequirementTest := RequirementToRequirementGreaterThan{}
+	db.Where(greaterThanRequirement).First(&greaterThanRequirementTest)
+	if greaterThanRequirementTest.ProgramRequirementID != 0 {
+		c.JSON(200, gin.H{})
+		return
+	}
+
+	//now we add the requirement
+	db.Create(&greaterThanRequirement)
+	c.JSON(200, gin.H{})
+}
+
+func addCourseExclusionToProgram(c *gin.Context) {
+	token := c.PostForm("token")
+	var admin Admin
+	admin, isExpired := findAdminGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if admin.ID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "admin not found"})
+		return
+	}
+
+	exclusionCourse := RequirementToExcludeThisCourse{}
+
+	course := RequirementCourse{}
+	course.CollegeName = c.PostForm("collegeName")
+	courseCodeString := c.PostForm("courseCode")
+	courseCode, _ := strconv.Atoi(courseCodeString)
+	course.CourseCode = uint64(courseCode)
+
+	courseTest := RequirementCourse{}
+	db.Where(course).First(&courseTest)
+	if courseTest.RequirementCourseID == 0 {
+		db.Create(&course)
+		db.Update()
+	}
+	db.Where(course).First(&course)
+
+}

@@ -251,6 +251,10 @@ func addCourseToProgramRequirement(c *gin.Context) {
 
 	programRequirement := ProgramRequirement{}
 	db.Where("program_requirement_id = ?", uint64(tmp)).First(&programRequirement)
+	if programRequirement.ProgramRequirementID == 0 {
+		c.JSON(200, gin.H{})
+		return
+	}
 
 	courseCodeInt, _ := strconv.Atoi(courseCodeString)
 	requirementCourse := RequirementCourse{}
@@ -261,13 +265,24 @@ func addCourseToProgramRequirement(c *gin.Context) {
 	db.Where(requirementCourse).First(&testReqCourse)
 	if testReqCourse.CourseCode == 0 {
 		db.Create(&requirementCourse)
+		db.Update()
 		db.Where(requirementCourse).First(&testReqCourse)
 	}
 	requirementCourse = testReqCourse
 
+
+	//make sure this requirement does not already exist
 	requirementClasses := RequirementToRequirementCourse{}
 	db.Where("program_requirement_id = ? and requirement_course_id = ?", programRequirement.ProgramRequirementID, requirementCourse.RequirementCourseID).Find(&requirementClasses)
 	if requirementClasses.ProgramRequirementID != 0 {
+		c.JSON(200, gin.H{})
+		return
+	}
+
+	//make sure this requirement does not exist in the exlude catagory
+	exludeCourse := RequirementToExcludeThisCourse{}
+	db.Where("program_requirement_id = ? and requirement_course_id = ?", , programRequirement.ProgramRequirementID, requirementCourse.RequirementCourseID).Find(&exludeCourse)
+	if exludeCourse.ProgramRequirementID != 0 {
 		c.JSON(200, gin.H{})
 		return
 	}
@@ -343,6 +358,7 @@ func addCourseExclusionToProgram(c *gin.Context) {
 	courseCode, _ := strconv.Atoi(courseCodeString)
 	course.CourseCode = uint64(courseCode)
 
+	//see if this course exists, if not: add it
 	courseTest := RequirementCourse{}
 	db.Where(course).First(&courseTest)
 	if courseTest.RequirementCourseID == 0 {
@@ -351,4 +367,38 @@ func addCourseExclusionToProgram(c *gin.Context) {
 	}
 	db.Where(course).First(&course)
 
+	requirement := ProgramRequirement{}
+	requirementIDString := c.PostForm("requirementID")
+	requirementID, _ := strconv.Atoi(requirementIDString)
+
+	//make sure the requirement exists
+	db.Where("program_requirement_id = ?", requirementID).First(&requirement)
+	if requirement.ProgramRequirementID == 0 {
+		c.JSON(200, gin.H{})
+		return
+	}
+
+	exclusionCourse.RequirementCourseID = course.RequirementCourseID
+	exclusionCourse.ProgramRequirementID = requirement.ProgramRequirementID
+
+	//make sure this exclusion does not already exist
+	exclusionCourseTest := RequirementToExcludeThisCourse{}
+	db.Where(exclusionCourse).First(&exclusionCourseTest)
+	if exclusionCourseTest.ProgramRequirementID != 0 {
+		c.JSON(200, gin.H{})
+		return
+	}
+
+	//make sure that this course is not enlisted as a specific course to meet the requirement
+	requirementCourse := RequirementCourse{}
+	db.Where(exclusionCourse).First(&requirementCourse)
+	if requirementCourse.RequirementCourseID != 0 {
+		c.JSON(200, gin.H{})
+		return
+	}
+
+	db.Create(&exclusionCourse)
+	db.Update()
+
+	c.JSON(200, gin.H{})
 }

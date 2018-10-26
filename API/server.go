@@ -40,11 +40,19 @@ func main() {
 	{
 		general := api.Group("/general")
 		{
-			general.POST("/searchForCourse", searchForCourse)
+			//petty functions for drop downs :/
 			general.POST("/getAllCatalogYearsForProgram")
 			general.GET("/getAllSemesters", getAllSemesters)
-			general.GET("/getProgramRequirements", getProgramRequirements)
+
+			//searching
+			general.POST("/searchForCourse", searchForCourse)
 			general.GET("/searchPrograms", searchPrograms)
+
+			//getting program requirement data
+			general.GET("/getProgramRequirements", getProgramRequirements)
+			general.GET("/getProgramCourseSpecificRequirementField")
+			general.GET("/getProgramCourseExclusionsRequirementField")
+			general.GET("/getProgramGreaterRequirementField")
 		}
 		user := api.Group("/user")
 		{
@@ -73,13 +81,29 @@ func main() {
 
 		adm := api.Group("/admin")
 		{
+			//general admin functions
 			adm.POST("/login", admLogin)
 			adm.POST("/logout", admLogout)
 			adm.GET("/checkToken", checkTokenAdmin)
+
+			//programs
 			adm.POST("/addProgram", addProgram)
 			adm.POST("/deleteProgram", deleteProgram)
+
+			//requirements
 			adm.POST("/addRequirementToProgram")
 			adm.POST("/deleteRequirementFromProgram")
+
+			//requirement fields
+			adm.POST("/addGreaterThanRequirementToProgram", addGreaterThanRequirementToProgram)
+			adm.POST("/addCourseToProgramRequirement", addCourseToProgramRequirement)
+			adm.POST("/addCourseExclusionToProgram", addCourseExclusionToProgram)
+
+			adm.POST("/deleteGreaterThanRequirement")
+			adm.POST("/deleteCourseToProgramRequirement")
+			adm.POST("/deleteCourseExclusionToProgram")
+
+			//courses
 			adm.POST("/addCourse", addCourse)
 			adm.POST("/deleteCourse", deleteCourse)
 		}

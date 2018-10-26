@@ -12,6 +12,7 @@ func getProgramRequirements(c *gin.Context) {
 	tmp, _ := strconv.Atoi(programString)
 	program.ProgramID = uint64(tmp)
 
+	//make sure the program exists
 	db.Where(program).Find(&program)
 	if program.ProgramID == 0 {
 		c.JSON(200, program)

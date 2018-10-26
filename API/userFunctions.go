@@ -360,38 +360,6 @@ func dropCourse(c *gin.Context) {
 	c.JSON(200, gin.H{"errorMsg": ""})
 }
 
-func searchForCourse(c *gin.Context) {
-
-	token := c.PostForm("token")
-	var student Student
-	student, isExpired := findStudentGivenToken(token)
-	if isExpired {
-		c.JSON(401, gin.H{"errorMsg": "token expired"})
-		return
-	}
-	if student.StudentID == 0 {
-		c.JSON(401, gin.H{"errorMsg": "student not found"})
-		return
-	}
-
-	var course Course
-
-	course.CollegeName = c.PostForm("collegeName")
-	courseCode := c.PostForm("courseCode")
-	CourseCodeint, _ := strconv.Atoi(courseCode)
-	course.CourseCode = uint64(CourseCodeint)
-	course.Teacher = c.PostForm("teacherName")
-	course.CourseName = c.PostForm("courseName")
-	course.Semester = c.PostForm("semester")
-	course.Location = c.PostForm("location")
-
-	returnCourses := []Course{}
-
-	db.Where(course).Find(&returnCourses)
-
-	c.JSON(200, returnCourses)
-}
-
 func addPreviousProgram(c *gin.Context) {
 	token := c.PostForm("token")
 	var student Student
@@ -452,36 +420,6 @@ func removePreviousProgram(c *gin.Context) {
 	c.JSON(200, gin.H{})
 }
 
-func getProgramRequirements(c *gin.Context) {
-	token := c.PostForm("token")
-	var student Student
-	student, isExpired := findStudentGivenToken(token)
-	if isExpired {
-		c.JSON(401, gin.H{"errorMsg": "token expired"})
-		return
-	}
-	if student.StudentID == 0 {
-		c.JSON(401, gin.H{"errorMsg": "student not found"})
-		return
-	}
-
-	program := Program{}
-	programString := c.Request.URL.Query()["programID"][0]
-	tmp, _ := strconv.Atoi(programString)
-	program.ProgramID = uint64(tmp)
-
-	db.Where(program).Find(&program)
-	if program.ProgramID == 0 {
-		c.JSON(200, program)
-	}
-
-	programReq := []ProgramRequirement{}
-
-	db.Where("program_id = ?", program.ProgramID).Find(&programReq)
-
-	c.JSON(200, programReq)
-}
-
 func getUsersPrograms(c *gin.Context) {
 	token := c.PostForm("token")
 	var student Student
@@ -499,31 +437,6 @@ func getUsersPrograms(c *gin.Context) {
 	db.Where("student_id = ?", student.StudentID).Find(&programs)
 
 	c.JSON(200, programs)
-}
-
-func searchPrograms(c *gin.Context) {
-	token := c.PostForm("token")
-	var student Student
-	student, isExpired := findStudentGivenToken(token)
-	if isExpired {
-		c.JSON(401, gin.H{"errorMsg": "token expired"})
-		return
-	}
-	if student.StudentID == 0 {
-		c.JSON(401, gin.H{"errorMsg": "student not found"})
-		return
-	}
-
-	program := Program{}
-	program.Program = c.Request.URL.Query()["programName"][0]
-	strTmp := c.Request.URL.Query()["catalogYear"][0]
-	tmp, _ := strconv.Atoi(strTmp)
-	program.CatalogYear = uint64(tmp)
-
-	returnPrograms := []Program{}
-	db.Where("program like ?", "%"+program.Program+"%").Find(&returnPrograms)
-
-	c.JSON(200, returnPrograms)
 }
 
 func getRemainingProgramRequirements(c *gin.Context) {

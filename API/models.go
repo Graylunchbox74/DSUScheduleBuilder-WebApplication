@@ -112,3 +112,12 @@ type returnRequirement struct {
 	requirementName string
 	courses         []string
 }
+
+type Semester struct {
+	season string `json:"season"`
+	year   uint64 `json:"year"`
+}
+
+type Location struct {
+	location string `gorm:"unique",json:"location"`
+}

@@ -36,6 +36,12 @@ func main() {
 	router := gin.Default()
 	api := router.Group("/api")
 	{
+		general := api.Group("/general"){
+			general.POST("/searchForCourse", searchForCourse)
+			general.POST("/getAllSemesters")
+			general.POST("/getAllCatalogYearsForProgram")
+			general.GET("/getProgramRequirements", getProgramRequirements)
+			general.GET("/searchPrograms", searchPrograms)		}
 		user := api.Group("/user")
 		{
 			//basic user functions
@@ -48,7 +54,6 @@ func main() {
 			//current course functions
 			user.POST("/enrollInCourse", enrollInCourse)
 			user.POST("/dropCourse", dropCourse)
-			user.POST("/searchForCourse", searchForCourse)
 			user.GET("/getEnrolledCourses", getEnrolledCourses)
 
 			//previous course functions
@@ -59,14 +64,7 @@ func main() {
 			user.POST("/addStudentProgram", addProgramUser)
 			user.POST("/removeStudentProgram", removeProgram)
 			user.GET("/getUsersPrograms", getUsersPrograms)
-			user.GET("/getProgramRequirements", getProgramRequirements)
-			user.GET("/searchPrograms", searchPrograms)
 			user.GET("/getRemainingProgramRequirements", getRemainingProgramRequirements)
-
-			//functions that are annoying to make
-			user.POST("/getAllSemesters")
-			user.POST("/getAllPrograms")
-			user.POST("/getAllCatalogYearsForProgram")
 		}
 
 		adm := api.Group("/admin")

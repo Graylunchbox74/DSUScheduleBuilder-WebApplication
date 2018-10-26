@@ -36,12 +36,14 @@ func main() {
 	router := gin.Default()
 	api := router.Group("/api")
 	{
-		general := api.Group("/general"){
+		general := api.Group("/general")
+		{
 			general.POST("/searchForCourse", searchForCourse)
-			general.POST("/getAllSemesters")
+			general.POST("/getAllSemesters", getAllSemesters)
 			general.POST("/getAllCatalogYearsForProgram")
 			general.GET("/getProgramRequirements", getProgramRequirements)
-			general.GET("/searchPrograms", searchPrograms)		}
+			general.GET("/searchPrograms", searchPrograms)
+		}
 		user := api.Group("/user")
 		{
 			//basic user functions

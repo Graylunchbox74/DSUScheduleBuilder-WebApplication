@@ -13,6 +13,6 @@ RUN go get -d -v github.com/jinzhu/gorm/dialects/sqlite
 
 EXPOSE 8080
 
-RUN go build server.go adminFunctions.go userFunctions.go models.go
+RUN go build server.go adminFunctions.go userFunctions.go models.go generalFunctions.go
 
 CMD ["./server"]

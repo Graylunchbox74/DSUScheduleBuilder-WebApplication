@@ -28,6 +28,8 @@ func init() {
 	db.AutoMigrate(&StudentToCourse{})
 	db.AutoMigrate(&Course{})
 	db.AutoMigrate(&AdminSessionToken{})
+	db.AutoMigrate(&Semester{})
+	db.AutoMigrate(&Location{})
 }
 
 func main() {
@@ -39,8 +41,8 @@ func main() {
 		general := api.Group("/general")
 		{
 			general.POST("/searchForCourse", searchForCourse)
-			general.POST("/getAllSemesters", getAllSemesters)
 			general.POST("/getAllCatalogYearsForProgram")
+			general.GET("/getAllSemesters", getAllSemesters)
 			general.GET("/getProgramRequirements", getProgramRequirements)
 			general.GET("/searchPrograms", searchPrograms)
 		}

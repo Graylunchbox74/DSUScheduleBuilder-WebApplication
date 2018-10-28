@@ -67,6 +67,8 @@ func admLogin(c *gin.Context) {
 	email := c.PostForm("email")
 	password := c.PostForm("password")
 
+	password = encryptPassword(password)
+
 	admin := Admin{}
 	db.Where("email = ? and password = ?", email, password).First(&admin)
 	if admin.ID == 0 {
@@ -229,6 +231,43 @@ func addRequirementToProgram(c *gin.Context) {
 		c.JSON(401, gin.H{"errorMsg": "admin not found"})
 		return
 	}
+
+	newRequirment := ProgramRequirement{}
+
+	newRequirment.RequirementName = c.PostForm("requirementName")
+	numberToTakeString := c.PostForm("numberToTake")
+	numberToTake, _ := strconv.Atoi(numberToTakeString)
+
+	//make sure the requirement at least requires one class
+	if numberToTake < 1 {
+		c.JSON(200, gin.H{})
+		return
+	}
+
+	programIDString := c.PostForm("programID")
+	programID, _ := strconv.Atoi(programIDString)
+	program := Program{}
+	//make sure the program exists with this id
+	db.Where("program_id = ?", uint64(programID)).First(&program)
+	if program.ProgramID == 0 {
+		c.JSON(200, gin.H{})
+		return
+	}
+
+	newRequirment.NumberToTake = uint64(numberToTake)
+	newRequirment.ProgramID = program.ProgramID
+
+	//make sure this requirement doesn't already exist
+	newRequirmentTest := ProgramRequirement{}
+	db.Where(newRequirment).First(&newRequirmentTest)
+	if newRequirmentTest.ProgramRequirementID != 0 {
+		c.JSON(200, gin.H{"programAlreadyExists": "true"})
+		return
+	}
+
+	db.Create(&newRequirment)
+	db.Update()
+	c.JSON(200, gin.H{})
 }
 
 func addCourseToProgramRequirement(c *gin.Context) {
@@ -270,7 +309,6 @@ func addCourseToProgramRequirement(c *gin.Context) {
 	}
 	requirementCourse = testReqCourse
 
-
 	//make sure this requirement does not already exist
 	requirementClasses := RequirementToRequirementCourse{}
 	db.Where("program_requirement_id = ? and requirement_course_id = ?", programRequirement.ProgramRequirementID, requirementCourse.RequirementCourseID).Find(&requirementClasses)
@@ -281,7 +319,7 @@ func addCourseToProgramRequirement(c *gin.Context) {
 
 	//make sure this requirement does not exist in the exlude catagory
 	exludeCourse := RequirementToExcludeThisCourse{}
-	db.Where("program_requirement_id = ? and requirement_course_id = ?", , programRequirement.ProgramRequirementID, requirementCourse.RequirementCourseID).Find(&exludeCourse)
+	db.Where("program_requirement_id = ? and requirement_course_id = ?", programRequirement.ProgramRequirementID, requirementCourse.RequirementCourseID).Find(&exludeCourse)
 	if exludeCourse.ProgramRequirementID != 0 {
 		c.JSON(200, gin.H{})
 		return
@@ -317,10 +355,10 @@ func addGreaterThanRequirementToProgram(c *gin.Context) {
 	requirementID, _ := strconv.Atoi(requirementIDString)
 	greaterThanRequirement.ProgramRequirementID = uint64(requirementID)
 
-	program := Program{}
-	db.Where("program_requirement_id = ?", greaterThanRequirement.ProgramRequirementID).First(&program)
+	requirement := ProgramRequirement{}
+	db.Where("program_requirement_id = ?", greaterThanRequirement.ProgramRequirementID).First(&requirement)
 	//make sure this program exists
-	if program.ProgramID == 0 {
+	if requirement.ProgramRequirementID == 0 {
 		c.JSON(200, gin.H{})
 		return
 	}
@@ -372,7 +410,7 @@ func addCourseExclusionToProgram(c *gin.Context) {
 	requirementID, _ := strconv.Atoi(requirementIDString)
 
 	//make sure the requirement exists
-	db.Where("program_requirement_id = ?", requirementID).First(&requirement)
+	db.Where("program_requirement_id = ?", uint64(requirementID)).First(&requirement)
 	if requirement.ProgramRequirementID == 0 {
 		c.JSON(200, gin.H{})
 		return
@@ -400,5 +438,32 @@ func addCourseExclusionToProgram(c *gin.Context) {
 	db.Create(&exclusionCourse)
 	db.Update()
 
+	c.JSON(200, gin.H{})
+}
+
+func deleteGreaterThanRequirement(c *gin.Context) {
+	token := c.PostForm("token")
+	var admin Admin
+	admin, isExpired := findAdminGivenToken(token)
+	if isExpired {
+		c.JSON(401, gin.H{"errorMsg": "token expired"})
+		return
+	}
+	if admin.ID == 0 {
+		c.JSON(401, gin.H{"errorMsg": "admin not found"})
+		return
+	}
+
+	requirementIDString := c.PostForm("requirementID")
+	courseCodeString := c.PostForm("courseCodeMinimum")
+	requirementID, _ := strconv.Atoi(requirementIDString)
+	requirementCourseCode, _ := strconv.Atoi(courseCodeString)
+
+	greaterThanRequirement := RequirementToRequirementGreaterThan{}
+	greaterThanRequirement.ProgramRequirementID = uint64(requirementID)
+	greaterThanRequirement.CourseCodeMinimum = uint64(requirementCourseCode)
+	greaterThanRequirement.CollegeName = c.PostForm("collegeName")
+
+	db.Delete(&greaterThanRequirement)
 	c.JSON(200, gin.H{})
 }

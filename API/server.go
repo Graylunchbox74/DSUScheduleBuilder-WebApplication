@@ -30,6 +30,11 @@ func init() {
 	db.AutoMigrate(&AdminSessionToken{})
 	db.AutoMigrate(&Semester{})
 	db.AutoMigrate(&Location{})
+	db.AutoMigrate(&ProgramRequirement{})
+	db.AutoMigrate(&RequirementToExcludeThisCourse{})
+	db.AutoMigrate(&RequirementToRequirementCourse{})
+	db.AutoMigrate(&RequirementToRequirementGreaterThan{})
+	db.AutoMigrate(&RequirementCourse{})
 }
 
 func main() {
@@ -50,9 +55,10 @@ func main() {
 
 			//getting program requirement data
 			general.GET("/getProgramRequirements", getProgramRequirements)
-			general.GET("/getProgramCourseSpecificRequirementField")
-			general.GET("/getProgramCourseExclusionsRequirementField")
-			general.GET("/getProgramGreaterRequirementField")
+
+			general.GET("/getProgramCourseSpecificRequirementField", getProgramCourseSpecificRequirementField)
+			general.GET("/getProgramCourseExclusionsRequirementField", getProgramCourseExclusionsRequirementField)
+			general.GET("/getProgramGreaterRequirementField", getProgramGreaterRequirementField)
 		}
 		user := api.Group("/user")
 		{
@@ -91,7 +97,7 @@ func main() {
 			adm.POST("/deleteProgram", deleteProgram)
 
 			//requirements
-			adm.POST("/addRequirementToProgram")
+			adm.POST("/addRequirementToProgram", addRequirementToProgram)
 			adm.POST("/deleteRequirementFromProgram")
 
 			//requirement fields
@@ -99,7 +105,7 @@ func main() {
 			adm.POST("/addCourseToProgramRequirement", addCourseToProgramRequirement)
 			adm.POST("/addCourseExclusionToProgram", addCourseExclusionToProgram)
 
-			adm.POST("/deleteGreaterThanRequirement")
+			adm.POST("/deleteGreaterThanRequirement", deleteGreaterThanRequirement)
 			adm.POST("/deleteCourseToProgramRequirement")
 			adm.POST("/deleteCourseExclusionToProgram")
 

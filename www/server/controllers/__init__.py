@@ -46,7 +46,7 @@ def login_required(func):
         if not logged_in:
             session['user'] = None
 
-            flask.flash(f"Your session has expired. Please log in again.", "danger")
+            flask.flash(f"Please log in.", "warning")
             return redirect(url_for('login'))
         return func(*args, **kwargs)
 

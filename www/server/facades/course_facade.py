@@ -152,7 +152,6 @@ def search_for_courses(token, kwargs):
     """
 
     data = {
-        "token": token
     }
     if kwargs.get('college_name') is not None:
         data["collegeName"] = kwargs.get('college_name')
@@ -168,7 +167,7 @@ def search_for_courses(token, kwargs):
         data["semester"] = kwargs.get('semester')
 
     try:
-        response = requests.post(f"{app.config['API_ENDPOINT']}/user/searchForCourse", data=data)
+        response = requests.post(f"{app.config['API_ENDPOINT']}/general/searchForCourse", data=data)
         json_response = response.json()
 
         if response.status_code == 401:

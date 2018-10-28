@@ -15,7 +15,7 @@ func getProgramRequirements(c *gin.Context) {
 	//make sure the program exists
 	db.Where(program).Find(&program)
 	if program.ProgramID == 0 {
-		c.JSON(200, program)
+		c.JSON(200, gin.H{})
 	}
 
 	programReq := []ProgramRequirement{}
@@ -67,4 +67,50 @@ func getAllLocations(c *gin.Context) {
 	locations := []Location{}
 	db.Find(&locations)
 	c.JSON(200, locations)
+}
+
+func getProgramCourseExclusionsRequirementField(c *gin.Context) {
+	requirementIDString := c.Request.URL.Query()["requirementID"][0]
+	requirementID, _ := strconv.Atoi(requirementIDString)
+	exclusionCourses := []RequirementToExcludeThisCourse{}
+	db.Where("program_requirement_id = ?", uint64(requirementID)).Find(&exclusionCourses)
+
+	courses := []RequirementCourse{}
+	courseTmp := RequirementCourse{}
+	for _, currentRecord := range exclusionCourses {
+		courseTmp = RequirementCourse{}
+		db.Where("requirement_course_id = ?", currentRecord.RequirementCourseID).First(&courseTmp)
+		if courseTmp.RequirementCourseID != 0 {
+			courses = append(courses, courseTmp)
+		}
+	}
+
+	c.JSON(200, courses)
+}
+
+func getProgramCourseSpecificRequirementField(c *gin.Context) {
+	requirementIDString := c.Request.URL.Query()["requirementID"][0]
+	requirementID, _ := strconv.Atoi(requirementIDString)
+	courseRequirementList := []RequirementToRequirementCourse{}
+	db.Where("program_requirement_id = ?", uint64(requirementID)).Find(&courseRequirementList)
+
+	courses := []RequirementCourse{}
+	courseTmp := RequirementCourse{}
+	for _, currentRecord := range courseRequirementList {
+		courseTmp = RequirementCourse{}
+		db.Where("requirement_course_id = ?", currentRecord.RequirementCourseID).First(&courseTmp)
+		if courseTmp.RequirementCourseID != 0 {
+			courses = append(courses, courseTmp)
+		}
+	}
+
+	c.JSON(200, courses)
+}
+
+func getProgramGreaterRequirementField(c *gin.Context) {
+	requirementIDString := c.Request.URL.Query()["requirementID"][0]
+	requirementID, _ := strconv.Atoi(requirementIDString)
+	courseRequirementList := []RequirementToRequirementGreaterThan{}
+	db.Where("program_requirement_id = ?", uint64(requirementID)).Find(&courseRequirementList)
+	c.JSON(200, courseRequirementList)
 }

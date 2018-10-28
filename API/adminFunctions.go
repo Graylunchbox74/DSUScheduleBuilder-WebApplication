@@ -281,7 +281,7 @@ func addCourseToProgramRequirement(c *gin.Context) {
 
 	//make sure this requirement does not exist in the exlude catagory
 	exludeCourse := RequirementToExcludeThisCourse{}
-	db.Where("program_requirement_id = ? and requirement_course_id = ?", , programRequirement.ProgramRequirementID, requirementCourse.RequirementCourseID).Find(&exludeCourse)
+	db.Where("program_requirement_id = ? and requirement_course_id = ?", programRequirement.ProgramRequirementID, requirementCourse.RequirementCourseID).Find(&exludeCourse)
 	if exludeCourse.ProgramRequirementID != 0 {
 		c.JSON(200, gin.H{})
 		return

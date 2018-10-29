@@ -58,11 +58,11 @@ type ProgramRequirement struct {
 }
 
 type StudentProgramRequirement struct {
-	RequirementName     string
-	ProgramID           uint64 `gorm:"foreignkey:ProgramID;association_foreignkey:ProgramID"`
-	StudentID           uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
-	NumberToTake        uint64
-	RequirementCourseID uint64
+	RequirementName      string
+	ProgramID            uint64 `gorm:"foreignkey:ProgramID;association_foreignkey:ProgramID"`
+	StudentID            uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
+	NumberToTake         uint64
+	ProgramRequirementID uint64 `gorm:"primary_key"`
 }
 
 type Course struct {
@@ -93,6 +93,17 @@ type RequirementToRequirementCourse struct {
 	RequirementCourseID  uint64
 }
 
+type RequirementToRequirementGreaterThan struct {
+	ProgramRequirementID uint64
+	CollegeName          string
+	CourseCodeMinimum    uint64
+}
+
+type RequirementToExcludeThisCourse struct {
+	ProgramRequirementID uint64
+	RequirementCourseID  uint64
+}
+
 type RequirementCourse struct {
 	RequirementCourseID uint64 `gorm:"primary_key"`
 	CollegeName         string
@@ -111,4 +122,13 @@ type returnRequirement struct {
 	isCompleted     bool
 	requirementName string
 	courses         []string
+}
+
+type Semester struct {
+	season string `json:"season"`
+	year   uint64 `json:"year"`
+}
+
+type Location struct {
+	location string `gorm:"unique",json:"location"`
 }

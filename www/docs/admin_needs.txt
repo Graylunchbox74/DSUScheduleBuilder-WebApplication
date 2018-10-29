@@ -1,0 +1,30 @@
+TAB BAR:
+	Programs
+	Courses
+		- Search courses
+		- Get all
+		- Edit one
+	
+	Users - Maybe in future
+		- List users
+		- Edit users
+
+
+Programs tab:
+	- Create new program button
+	- Search query for programs
+		- Name
+		- Catalog Year
+
+	Edit button next to program
+
+
+
+Program specific page:
+	- Has list of specific requiremnets
+
+
+Requirement page:
+	- 
+
+Ability to create a program from a template

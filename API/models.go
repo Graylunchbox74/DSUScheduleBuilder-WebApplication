@@ -16,6 +16,27 @@ type AdminSessionToken struct {
 	TimeUpdated time.Time
 }
 
+type ResponseBasicAccount struct {
+	StudentID uint64 `json:"studentID"`
+	Email     string `json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+type ResponsePendingAccount struct {
+	Email     string `json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+type PendingAccount struct {
+	Email     string `gorm:"unique;not null"`
+	FirstName string `gorm:"not null"`
+	LastName  string `gorm:"not null"`
+	UUID      string `gorm:"primary_key"`
+	Password  string
+}
+
 type SessionToken struct {
 	StudentID   uint64 `gorm:"foreignkey:StudentID;association_foreignkey:StudentID"`
 	Token       string `gorm:"unique"`

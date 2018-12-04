@@ -2,12 +2,9 @@ FROM golang:1.11
 
 WORKDIR /go/src/app
 
-COPY . .
+RUN go get -d -v github.com/gin-gonic/gin github.com/jinzhu/gorm github.com/jinzhu/gorm/dialects/sqlite gopkg.in/mailgun/mailgun-go.v1 golang.org/x/crypto/bcrypt github.com/satori/go.uuid
 
-RUN go get -d -v github.com/gin-gonic/gin
-RUN go get -d -v github.com/jinzhu/gorm
-RUN go get -d -v github.com/jinzhu/gorm/dialects/postgres
-RUN go get -d -v github.com/jinzhu/gorm/dialects/sqlite
+COPY . .
 
 # RUN go install -v ./
 

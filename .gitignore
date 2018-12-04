@@ -2,3 +2,5 @@ __pycache__/
 .vscode/
 .DS_Store
 /API/server
+
+/API/*.json

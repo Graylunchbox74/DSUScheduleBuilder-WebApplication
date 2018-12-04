@@ -133,7 +133,7 @@ def register_user(**kwargs):
     }
 
     try:
-        response = requests.post(f"{app.config['API_ENDPOINT']}/user/newUser", data=data)
+        response = requests.post(f"{app.config['API_ENDPOINT']}/user/create", json=data)
         json_response = response.json()
 
         result_code = FRC.SERVER_ERROR

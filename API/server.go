@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
@@ -17,24 +16,29 @@ func init() {
 
 	var err error
 	db, err = gorm.Open("sqlite3", "db/test.db")
+
 	if err != nil {
 		panic("Failed to connect to the database")
 	}
-	db.AutoMigrate(&Student{})
-	db.AutoMigrate(&SessionToken{})
-	db.AutoMigrate(&Admin{})
-	db.AutoMigrate(&StudentProgram{})
-	db.AutoMigrate(&Program{})
-	db.AutoMigrate(&StudentToCourse{})
-	db.AutoMigrate(&Course{})
-	db.AutoMigrate(&AdminSessionToken{})
-	db.AutoMigrate(&Semester{})
-	db.AutoMigrate(&Location{})
-	db.AutoMigrate(&ProgramRequirement{})
-	db.AutoMigrate(&RequirementToExcludeThisCourse{})
-	db.AutoMigrate(&RequirementToRequirementCourse{})
-	db.AutoMigrate(&RequirementToRequirementGreaterThan{})
-	db.AutoMigrate(&RequirementCourse{})
+
+	db.AutoMigrate(
+		&Student{},
+		&SessionToken{},
+		&Admin{},
+		&StudentProgram{},
+		&PendingAccount{},
+		&Program{},
+		&StudentToCourse{},
+		&Course{},
+		&AdminSessionToken{},
+		&Semester{},
+		&Location{},
+		&ProgramRequirement{},
+		&RequirementToExcludeThisCourse{},
+		&RequirementToRequirementCourse{},
+		&RequirementToRequirementGreaterThan{},
+		&RequirementCourse{},
+	)
 }
 
 func main() {
@@ -59,6 +63,9 @@ func main() {
 			general.GET("/getProgramCourseSpecificRequirementField", getProgramCourseSpecificRequirementField)
 			general.GET("/getProgramCourseExclusionsRequirementField", getProgramCourseExclusionsRequirementField)
 			general.GET("/getProgramGreaterRequirementField", getProgramGreaterRequirementField)
+
+			// Add data from scraper service
+			general.POST("/addData", postAddData)
 		}
 		user := api.Group("/user")
 		{
@@ -66,8 +73,10 @@ func main() {
 			user.POST("/login", login)
 			user.POST("/logout", logout)
 			user.GET("/checkToken", checkToken)
-			user.POST("/newUser", newUser)
+			// user.POST("/newUser", newUser)
 			user.POST("/deleteUser", deleteUser)
+			user.GET("/confirm/:uuid", getConfirmAccount)
+			user.POST("/create", postCreateAccount)
 
 			//current course functions
 			user.POST("/enrollInCourse", enrollInCourse)

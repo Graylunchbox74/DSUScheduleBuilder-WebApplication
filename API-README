@@ -5,7 +5,7 @@
     returns
         student object
 
-/api/user/newUser
+/api/user/create
     POST
         parameters:
             email

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"sort"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 //fundamental functions
@@ -39,6 +41,53 @@ func createUniqueKey(id uint64) string {
 	studentToken.TimeUpdated = time.Now()
 	db.Create(&studentToken)
 	return studentToken.Token
+}
+
+func CreateAccount(db *gorm.DB, user *Student) (ResponseBasicAccount, error) {
+	err := db.Create(&user).Error
+
+	if err != nil {
+		return ResponseBasicAccount{}, err
+	}
+
+	return user.BasicResponse(), nil
+}
+
+func (a *Student) BasicResponse() ResponseBasicAccount {
+	return ResponseBasicAccount{
+		a.StudentID,
+		a.Email,
+		a.FirstName,
+		a.LastName,
+	}
+}
+
+func CreatePendingAccount(db *gorm.DB, pendingUser *PendingAccount) (ResponsePendingAccount, error) {
+	var existingUser Student
+
+	if rdb := db.Where(Student{Email: pendingUser.Email}).First(&existingUser); !rdb.RecordNotFound() && rdb.Error != nil {
+		return ResponsePendingAccount{}, rdb.Error
+	}
+
+	if existingUser.Email == pendingUser.Email {
+		return ResponsePendingAccount{}, errors.New("Account is not unique")
+	}
+
+	err := db.Create(&pendingUser).Error
+
+	if err != nil {
+		return ResponsePendingAccount{}, err
+	}
+
+	return pendingUser.Response(), nil
+}
+
+func (pa *PendingAccount) Response() ResponsePendingAccount {
+	return ResponsePendingAccount{
+		pa.Email,
+		pa.FirstName,
+		pa.LastName,
+	}
 }
 
 //functions specific for requests
@@ -122,28 +171,29 @@ func checkToken(c *gin.Context) {
 	}
 }
 
-func newUser(c *gin.Context) {
-	var student Student
+// took out because createAccount replaces this
+// func newUser(c *gin.Context) {
+// 	var student Student
 
-	student.Email = c.PostForm("email")
-	student.Password = c.PostForm("password")
-	student.FirstName = c.PostForm("firstName")
-	student.LastName = c.PostForm("lastName")
+// 	student.Email = c.PostForm("email")
+// 	student.Password = c.PostForm("password")
+// 	student.FirstName = c.PostForm("firstName")
+// 	student.LastName = c.PostForm("lastName")
 
-	student.Password = encryptPassword(student.Password)
+// 	student.Password = encryptPassword(student.Password)
 
-	//send email for verification--riley will insert this
+// 	//send email for verification--riley will insert this
 
-	//the email will have its own call that will create the user in the database
-	err := db.Create(&student).Error
-	if err != nil {
-		fmt.Println(err.Error())
-		c.JSON(400, gin.H{"errorMsg": err})
-	} else {
-		db.Update()
-		c.JSON(200, gin.H{"errorMsg": ""})
-	}
-}
+// 	//the email will have its own call that will create the user in the database
+// 	err := db.Create(&student).Error
+// 	if err != nil {
+// 		fmt.Println(err.Error())
+// 		c.JSON(400, gin.H{"errorMsg": err})
+// 	} else {
+// 		db.Update()
+// 		c.JSON(200, gin.H{"errorMsg": ""})
+// 	}
+// }
 
 func deleteUser(c *gin.Context) {
 	token := c.PostForm("token")

@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>Enrolled Courses</h1>
+<h1>Enrolled Courses</h1><a class="btn btn-primary" href="{{ url_for('courses_search') }}">Search for courses</a>
 <div class="w-100" id="enrolled-container">
     {% for course in courses %}
     <div class="d-flex flex-wrap py-3 my-2 w-100 secondary-background">

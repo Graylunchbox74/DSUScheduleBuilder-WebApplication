@@ -42,6 +42,7 @@
     <text id="timeline-text" x="10px" y="12px" style="display: none">8:00AM</text>
 
     {% for course in courses %}
+	<a href="/courses">
     <g class="course">
         <rect x="{{ 20 * course.day_of_week }}%" y="{{ (course.start_time - 8) * 60 + 50 }}px" width="19%" height="{{ (course.end_time - course.start_time) * 60}}px"
             style="fill: {{ course.color }};">
@@ -55,6 +56,7 @@
         <text style="clip-path: url(#course-text-clip-{{ loop.index }});" alignment-baseline="hanging" x="{{ 20 * course.day_of_week + 1 }}%"
             y="{{ (course.start_time - 8) * 60 + 75}}px">{{course.second_row}}</text>
     </g>
+	</a>
     {% endfor %}
 
 
